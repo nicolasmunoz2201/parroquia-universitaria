@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "Parroquia Universitaria UdeC - API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "organismo_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Check de salud",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Organismo",
+      "item": [
+        {
+          "name": "Listar organismos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/organismos"
+          }
+        },
+        {
+          "name": "Crear organismo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Catequesis\",\n  \"descripcion\": \"Formacion sacramental\"\n}"
+            },
+            "url": "{{base_url}}/api/organismos"
+          }
+        },
+        {
+          "name": "Obtener organismo por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/organismos/{{organismo_id}}"
+          }
+        },
+        {
+          "name": "Actualizar organismo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Descripcion actualizada\"\n}"
+            },
+            "url": "{{base_url}}/api/organismos/{{organismo_id}}"
+          }
+        },
+        {
+          "name": "Desactivar organismo",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/organismos/{{organismo_id}}/desactivar"
+          }
+        },
+        {
+          "name": "Activar organismo",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/organismos/{{organismo_id}}/activar"
+          }
+        },
+        {
+          "name": "Eliminar organismo",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/organismos/{{organismo_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}
