@@ -11,3 +11,69 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Rol {
+  ADMINISTRADOR
+  ENCARGADO_ORGANISMO
+  ENCARGADO_COMEDOR
+  FELIGRES
+}
+
+model Usuario {
+  id            String          @id @default(cuid())
+  nombre        String
+  email         String          @unique
+  rol           Rol
+  createdAt     DateTime        @default(now())
+  publicaciones Publicacion[]
+  hitos         HitoHistorico[]
+}
+
+model Organismo {
+  id            String        @id @default(cuid())
+  nombre        String
+  descripcion   String?
+  createdAt     DateTime      @default(now())
+  publicaciones Publicacion[]
+}
+
+model Publicacion {
+  id          String    @id @default(cuid())
+  titulo      String
+  contenido   String
+  imagenUrl   String?
+  autor       Usuario   @relation(fields: [autorId], references: [id])
+  autorId     String
+  organismo   Organismo @relation(fields: [organismoId], references: [id])
+  organismoId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model HitoHistorico {
+  id          String       @id @default(cuid())
+  titulo      String
+  descripcion String
+  fecha       DateTime
+  autor       Usuario      @relation(fields: [autorId], references: [id])
+  autorId     String
+  fotos       FotoHito[]
+  testimonios Testimonio[]
+  createdAt   DateTime     @default(now())
+}
+
+model FotoHito {
+  id     String        @id @default(cuid())
+  url    String
+  hito   HitoHistorico @relation(fields: [hitoId], references: [id])
+  hitoId String
+}
+
+model Testimonio {
+  id          String        @id @default(cuid())
+  autorNombre String
+  contenido   String
+  hito        HitoHistorico @relation(fields: [hitoId], references: [id])
+  hitoId      String
+  createdAt   DateTime      @default(now())
+}
