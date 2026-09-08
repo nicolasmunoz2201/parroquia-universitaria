@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Prisma } from "../generated/prisma/client";
 import * as organismoService from "../services/organismo.service";
 
 export async function listar(req: Request, res: Response) {
@@ -44,5 +45,36 @@ export async function desactivar(req: Request, res: Response) {
     res.json(organismo);
   } catch (error) {
     res.status(404).json({ message: "Organismo no encontrado" });
+  }
+}
+
+export async function activar(req: Request, res: Response) {
+  try {
+    const organismo = await organismoService.activarOrganismo(req.params.id as string);
+    res.json(organismo);
+  } catch (error) {
+    res.status(404).json({ message: "Organismo no encontrado" });
+  }
+}
+
+export async function eliminar(req: Request, res: Response) {
+  try {
+    await organismoService.eliminarOrganismo(req.params.id as string);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        res.status(404).json({ message: "Organismo no encontrado" });
+        return;
+      }
+      if (error.code === "P2003") {
+        res.status(409).json({
+          message:
+            "No se puede eliminar: el organismo tiene publicaciones asociadas. Desactívalo en su lugar.",
+        });
+        return;
+      }
+    }
+    res.status(500).json({ message: "Error al eliminar el organismo" });
   }
 }

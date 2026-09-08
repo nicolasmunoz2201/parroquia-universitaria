@@ -24,3 +24,11 @@ export function actualizarOrganismo(
 export function desactivarOrganismo(id: string) {
   return prisma.organismo.update({ where: { id }, data: { activo: false } });
 }
+
+export function activarOrganismo(id: string) {
+  return prisma.organismo.update({ where: { id }, data: { activo: true } });
+}
+
+export function eliminarOrganismo(id: string) {
+  return prisma.organismo.delete({ where: { id } });
+}
