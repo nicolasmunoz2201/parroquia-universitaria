@@ -33,6 +33,7 @@ model Organismo {
   id            String        @id @default(cuid())
   nombre        String
   descripcion   String?
+  activo        Boolean       @default(true)
   createdAt     DateTime      @default(now())
   publicaciones Publicacion[]
 }
