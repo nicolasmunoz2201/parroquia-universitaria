@@ -43,3 +43,17 @@ export function getUsuarioActual(): Usuario | null {
 export function getToken(): string | null {
   return localStorage.getItem("token");
 }
+
+export async function verificarToken(): Promise<boolean> {
+  const token = getToken();
+  if (!token) return false;
+
+  try {
+    const res = await fetch(`${API_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
