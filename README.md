@@ -26,10 +26,13 @@ docs/       Documentación del proyecto (historias de usuario, etc.)
 ```bash
 cd backend
 npm install
-# copiar .env.example a .env (si existe) y configurar DATABASE_URL con tu PostgreSQL
+# crear .env con DATABASE_URL, JWT_SECRET, ADMIN_EMAIL y ADMIN_PASSWORD
 npx prisma migrate dev
+npx ts-node --transpile-only prisma/seed.ts   # crea el usuario administrador inicial
 npm run dev
 ```
+
+El seed crea un usuario con el correo `ADMIN_EMAIL` y contraseña `ADMIN_PASSWORD` definidos en tu `.env`.
 
 ### Frontend
 
