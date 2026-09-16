@@ -4,10 +4,14 @@
   --bg: #f4f5f8;
   --surface: #ffffff;
   --border: #dde0e6;
-  --accent: #3e8fd0;
-  --accent-soft: #e5f1fa;
-  --error: #c0392b;
-  --error-soft: #fbeaea;
+  --accent: #223c6a;
+  --accent-soft: #e6ebf3;
+  --acento-secundario: #e69b0a;
+  --acento-secundario-soft: #fbeed2;
+  --error: #d21428;
+  --error-soft: #fce6e8;
+  --fuente-titulos: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-texto: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
@@ -20,7 +24,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--fuente-texto);
 }
 
 #root {
