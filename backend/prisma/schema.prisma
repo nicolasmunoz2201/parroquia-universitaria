@@ -25,6 +25,8 @@ model Usuario {
   email         String          @unique
   password      String
   rol           Rol
+  organismo     Organismo?      @relation(fields: [organismoId], references: [id])
+  organismoId   String?
   createdAt     DateTime        @default(now())
   publicaciones Publicacion[]
   hitos         HitoHistorico[]
@@ -37,13 +39,14 @@ model Organismo {
   activo        Boolean       @default(true)
   createdAt     DateTime      @default(now())
   publicaciones Publicacion[]
+  encargados    Usuario[]
 }
 
 model Publicacion {
   id          String    @id @default(cuid())
   titulo      String
   contenido   String
-  imagenUrl   String?
+  imagenes    String[] @default([])
   autor       Usuario   @relation(fields: [autorId], references: [id])
   autorId     String
   organismo   Organismo @relation(fields: [organismoId], references: [id])
