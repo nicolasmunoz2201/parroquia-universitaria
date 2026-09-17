@@ -3,6 +3,13 @@ import fs from "fs";
 import path from "path";
 import * as publicacionService from "../services/publicacion.service";
 
+function eliminarArchivos(archivos: Express.Multer.File[]) {
+  for (const archivo of archivos) {
+    fs.unlink(archivo.path, () => {});
+  }
+}
+
+
 export async function listar(req: Request, res: Response) {
   const soloOrganismosActivos = req.query.activos === "true";
   const publicaciones = await publicacionService.listarPublicaciones({ soloOrganismosActivos });
@@ -24,6 +31,7 @@ export async function crear(req: Request, res: Response) {
   const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
   const imagenes = archivos.map((archivo) => `/uploads/${archivo.filename}`);
 
+try {
   const publicacion = await publicacionService.crearPublicacion({
     titulo,
     contenido,
@@ -32,6 +40,10 @@ export async function crear(req: Request, res: Response) {
     organismoId,
   });
   res.status(201).json(publicacion);
+} catch (error) {
+  eliminarArchivos(archivos);
+  throw error;
+}
 }
 
 export async function actualizar(req: Request, res: Response) {
@@ -51,7 +63,7 @@ export async function actualizar(req: Request, res: Response) {
 
   const { titulo, contenido } = req.body;
   const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
-
+try {
   const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
     ...(titulo ? { titulo } : {}),
     ...(contenido ? { contenido } : {}),
@@ -68,6 +80,10 @@ export async function actualizar(req: Request, res: Response) {
   }
 
   res.json(publicacion);
+} catch (error) {
+  eliminarArchivos(archivos);
+  throw error;
+}   
 }
 
 export async function eliminar(req: Request, res: Response) {
