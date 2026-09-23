@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backend - instalar y revisar tipos
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate --config prisma7.config.ts
+          npx tsc --noEmit
+
+      - name: Frontend - instalar, lint y build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+
+  desplegar:
+    needs: verificar
+    if: github.event_name == 'push'
+    runs-on: self-hosted
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Inyectar variables de entorno
+        run: |
+          cp ~/backend.env ./backend/.env
+          cp ~/frontend.env ./frontend/.env
+
+      - name: Enlazar carpeta de fotos
+        run: |
+          mkdir -p ~/parroquia-uploads
+          ln -sfn ~/parroquia-uploads ./backend/uploads
+
+      - name: Instalar y preparar Backend
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate --config prisma7.config.ts
+          npx prisma migrate deploy --config prisma7.config.ts
+
+      - name: Compilar Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Reiniciar Backend con PM2
+        working-directory: backend
+        run: |
+          export RUNNER_TRACKING_ID=""
+          pm2 delete parroquia-backend || true
+          setsid pm2 start npm --name parroquia-backend -- run dev
+          pm2 save
