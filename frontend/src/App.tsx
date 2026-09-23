@@ -6,8 +6,9 @@ import DashboardPublicaciones from "./components/DashboardPublicaciones";
 import DashboardOrganismos from "./components/DashboardOrganismos";
 import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
-import { getUsuarioActual, getToken, logout, verificarToken } from "./lib/api";
-import type { Usuario } from "./lib/api";
+import { getToken } from "./services/api";
+import { getUsuarioActual, logout, verificarToken } from "./services/auth.service";
+import type { Usuario } from "./services/auth.service";
 import "./App.css";
 
 function puedeGestionarPublicaciones(usuario: Usuario | null) {

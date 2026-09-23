@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { API_URL } from "../lib/api";
-import type { Publicacion } from "../lib/api";
+import { API_URL } from "../services/api";
+import type { Publicacion } from "../services/publicacion.service";
 
 const INTERVALO_MS = 6000;
 

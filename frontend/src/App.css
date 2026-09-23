@@ -1,7 +1,7 @@
 /* ---------- Notificaciones (toast) ---------- */
 .toast-contenedor {
   position: fixed;
-  bottom: 20px;
+  top: 76px;
   right: 20px;
   display: flex;
   flex-direction: column;
@@ -11,12 +11,14 @@
 }
 
 .toast {
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-size: 14px;
+  min-width: 300px;
+  max-width: 420px;
+  padding: 16px 22px;
+  border-radius: 10px;
+  font-size: 15.5px;
   font-weight: 500;
   color: #fff;
-  box-shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
   animation: toast-entrada 0.2s ease;
 }
 
@@ -31,7 +33,7 @@
 @keyframes toast-entrada {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -43,11 +45,12 @@
   .toast-contenedor {
     left: 16px;
     right: 16px;
-    bottom: 16px;
   }
 
   .toast {
     width: 100%;
+    min-width: 0;
+    max-width: none;
   }
 }
 
@@ -499,57 +502,63 @@ h2,
   resize: vertical;
 }
 
-.campo-imagen {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.boton-quitar-imagen {
+.publicacion-form .boton-quitar-imagen {
+  align-self: flex-start;
+  margin-top: 10px;
   padding: 7px 12px;
   background: transparent;
   border: 1px solid var(--error);
   color: var(--error);
   border-radius: 6px;
   font-size: 13px;
-  cursor: pointer;
+  font-weight: 500;
 }
 
 .imagenes-preview {
   list-style: none;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .imagenes-preview li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 6px 10px;
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
   background: var(--accent-soft);
-  border-radius: 6px;
-  font-size: 12.5px;
+}
+
+.imagenes-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
 }
 
 .imagenes-preview li span {
+  display: block;
+  padding: 5px 8px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .imagenes-preview li button {
-  flex: none;
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  margin: 0;
   padding: 0;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   color: var(--error);
   font-size: 16px;
   line-height: 1;
@@ -557,7 +566,7 @@ h2,
 }
 
 .imagenes-preview li button:hover {
-  background: rgba(192, 57, 43, 0.15);
+  background: #fff;
 }
 
 .publicacion-form input:focus,
@@ -603,6 +612,10 @@ h2,
 
 .acciones-formulario button {
   margin-top: 22px;
+}
+
+.acciones-formulario button[type="submit"] {
+  flex: 1;
 }
 
 .publicacion-form .boton-secundario {
@@ -652,4 +665,59 @@ h2,
 .acciones-organismo button:first-child {
   border-color: var(--border);
   color: var(--ink);
+}
+
+/* ---------- Dialogo de confirmacion ---------- */
+.dialogo-confirmacion {
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.35);
+}
+
+.dialogo-confirmacion::backdrop {
+  background: rgba(20, 22, 30, 0.45);
+}
+
+.dialogo-confirmacion h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.dialogo-confirmacion p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.dialogo-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.dialogo-acciones button {
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.dialogo-cancelar {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.dialogo-eliminar {
+  background: var(--error);
+  border: none;
+  color: #fff;
 }

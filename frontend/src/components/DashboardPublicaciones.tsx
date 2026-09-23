@@ -1,12 +1,24 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { crearPublicacion, actualizarPublicacion, eliminarPublicacion } from "../lib/api";
-import type { Publicacion, Usuario } from "../lib/api";
+import {
+  crearPublicacion,
+  actualizarPublicacion,
+  eliminarPublicacion,
+} from "../services/publicacion.service";
+import type { Publicacion } from "../services/publicacion.service";
+import type { Usuario } from "../services/auth.service";
 import { usePublicaciones } from "../hooks/usePublicaciones";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
+import ConfirmarEliminacion from "./ConfirmarEliminacion";
 
 const MAX_FOTOS = 3;
+const MAX_TAMANO_FOTO_MB = 5;
+
+interface ImagenSeleccionada {
+  archivo: File;
+  vistaPrevia: string;
+}
 
 interface Props {
   usuario: Usuario;
@@ -27,10 +39,11 @@ export default function DashboardPublicaciones({ usuario }: Props) {
   const [titulo, setTitulo] = useState("");
   const [contenido, setContenido] = useState("");
   const [organismoId, setOrganismoId] = useState(usuario.organismoId ?? "");
-  const [imagenes, setImagenes] = useState<File[]>([]);
+  const [imagenes, setImagenes] = useState<ImagenSeleccionada[]>([]);
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [errorEliminar, setErrorEliminar] = useState("");
+  const [porEliminar, setPorEliminar] = useState<Publicacion | null>(null);
   const inputImagenRef = useRef<HTMLInputElement>(null);
 
   const publicacionesGestionables = publicaciones.filter(
@@ -38,6 +51,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
   );
 
   function handleQuitarImagenes() {
+    imagenes.forEach((imagen) => URL.revokeObjectURL(imagen.vistaPrevia));
     setImagenes([]);
     if (inputImagenRef.current) {
       inputImagenRef.current.value = "";
@@ -45,7 +59,8 @@ export default function DashboardPublicaciones({ usuario }: Props) {
   }
 
   function handleQuitarImagen(indice: number) {
-    setImagenes((actuales) => actuales.filter((_, i) => i !== indice));
+    URL.revokeObjectURL(imagenes[indice].vistaPrevia);
+    setImagenes(imagenes.filter((_, i) => i !== indice));
   }
 
   function handleImagenesChange(e: ChangeEvent<HTMLInputElement>) {
@@ -57,8 +72,20 @@ export default function DashboardPublicaciones({ usuario }: Props) {
       return;
     }
 
+    const fotoPesada = nuevosArchivos.find(
+      (archivo) => archivo.size > MAX_TAMANO_FOTO_MB * 1024 * 1024
+    );
+    if (fotoPesada) {
+      setError(`"${fotoPesada.name}" pesa mas de ${MAX_TAMANO_FOTO_MB} MB`);
+      return;
+    }
+
     setError("");
-    setImagenes((actuales) => [...actuales, ...nuevosArchivos]);
+    const nuevas = nuevosArchivos.map((archivo) => ({
+      archivo,
+      vistaPrevia: URL.createObjectURL(archivo),
+    }));
+    setImagenes([...imagenes, ...nuevas]);
   }
 
   function handleEditar(pub: Publicacion) {
@@ -86,7 +113,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     const formData = new FormData();
     formData.append("titulo", titulo);
     formData.append("contenido", contenido);
-    imagenes.forEach((archivo) => formData.append("imagenes", archivo));
+    imagenes.forEach((imagen) => formData.append("imagenes", imagen.archivo));
 
     if (!editando) {
       const organismoDestino = esAdmin ? organismoId : usuario.organismoId;
@@ -125,9 +152,12 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     try {
       await eliminarPublicacion(id);
       if (editando?.id === id) handleCancelarEdicion();
+      mostrarToast("Publicacion eliminada con exito");
       await recargarPublicaciones();
     } catch (err) {
-      setErrorEliminar(err instanceof Error ? err.message : "No se pudo eliminar la publicacion");
+      const mensaje = err instanceof Error ? err.message : "No se pudo eliminar la publicacion";
+      setErrorEliminar(mensaje);
+      mostrarToast(mensaje, "error");
     }
   }
 
@@ -181,38 +211,37 @@ export default function DashboardPublicaciones({ usuario }: Props) {
               : "Esta publicacion no tiene fotos todavia."}
           </p>
         )}
-        <div className="campo-imagen">
-          <input
-            id="imagen"
-            ref={inputImagenRef}
-            type="file"
-            accept="image/*"
-            multiple
-            disabled={imagenes.length >= MAX_FOTOS}
-            onChange={handleImagenesChange}
-          />
-          {imagenes.length > 0 && (
-            <button type="button" className="boton-quitar-imagen" onClick={handleQuitarImagenes}>
-              Quitar todas
-            </button>
-          )}
-        </div>
+        <input
+          id="imagen"
+          ref={inputImagenRef}
+          type="file"
+          accept="image/*"
+          multiple
+          disabled={imagenes.length >= MAX_FOTOS}
+          onChange={handleImagenesChange}
+        />
 
         {imagenes.length > 0 && (
-          <ul className="imagenes-preview">
-            {imagenes.map((archivo, indice) => (
-              <li key={`${archivo.name}-${archivo.lastModified}-${indice}`}>
-                <span>{archivo.name}</span>
-                <button
-                  type="button"
-                  aria-label={`Quitar ${archivo.name}`}
-                  onClick={() => handleQuitarImagen(indice)}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="imagenes-preview">
+              {imagenes.map(({ archivo, vistaPrevia }, indice) => (
+                <li key={vistaPrevia}>
+                  <img src={vistaPrevia} alt={archivo.name} />
+                  <span>{archivo.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Quitar ${archivo.name}`}
+                    onClick={() => handleQuitarImagen(indice)}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button type="button" className="boton-quitar-imagen" onClick={handleQuitarImagenes}>
+              Quitar todas las fotos
+            </button>
+          </>
         )}
 
         {error && <p className="login-error">{error}</p>}
@@ -239,12 +268,24 @@ export default function DashboardPublicaciones({ usuario }: Props) {
             </span>
             <span className="acciones-organismo">
               <button onClick={() => handleEditar(pub)}>Editar</button>
-              <button onClick={() => handleEliminar(pub.id)}>Eliminar</button>
+              <button onClick={() => setPorEliminar(pub)}>Eliminar</button>
             </span>
           </li>
         ))}
         {publicacionesGestionables.length === 0 && <li>No hay publicaciones todavia.</li>}
       </ul>
+
+      {porEliminar && (
+        <ConfirmarEliminacion
+          titulo="Eliminar publicacion"
+          mensaje={`¿Seguro que quieres eliminar "${porEliminar.titulo}"? Esta accion no se puede deshacer.`}
+          onConfirmar={() => {
+            setPorEliminar(null);
+            handleEliminar(porEliminar.id);
+          }}
+          onCancelar={() => setPorEliminar(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Usuario } from "../lib/api";
+import type { Usuario } from "../services/auth.service";
 
 interface Props {
   usuario: Usuario;

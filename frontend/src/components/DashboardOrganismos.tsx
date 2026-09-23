@@ -1,18 +1,28 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { crearOrganismo, desactivarOrganismo, activarOrganismo, eliminarOrganismo } from "../lib/api";
+import {
+  crearOrganismo,
+  desactivarOrganismo,
+  activarOrganismo,
+  eliminarOrganismo,
+} from "../services/organismo.service";
+import type { Organismo } from "../services/organismo.service";
 import { useOrganismos } from "../hooks/useOrganismos";
+import { useToast } from "../context/ToastContext";
+import ConfirmarEliminacion from "./ConfirmarEliminacion";
 
 const NOMBRE_ORGANISMO_REGEX = /^[\p{L}\p{N} .,-]+$/u;
 
 export default function DashboardOrganismos() {
   const { organismos, cargando, error: errorCarga, recargar } = useOrganismos();
+  const { mostrarToast } = useToast();
 
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [error, setError] = useState("");
   const [creando, setCreando] = useState(false);
   const [errorAccion, setErrorAccion] = useState("");
+  const [porEliminar, setPorEliminar] = useState<Organismo | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,9 +42,12 @@ export default function DashboardOrganismos() {
       });
       setNombre("");
       setDescripcion("");
+      mostrarToast("Organismo creado con exito");
       await recargar();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear el organismo");
+      const mensaje = err instanceof Error ? err.message : "Error al crear el organismo";
+      setError(mensaje);
+      mostrarToast(mensaje, "error");
     } finally {
       setCreando(false);
     }
@@ -48,9 +61,12 @@ export default function DashboardOrganismos() {
       } else {
         await activarOrganismo(id);
       }
+      mostrarToast(activo ? "Organismo desactivado con exito" : "Organismo activado con exito");
       await recargar();
     } catch (err) {
-      setErrorAccion(err instanceof Error ? err.message : "No se pudo cambiar el estado");
+      const mensaje = err instanceof Error ? err.message : "No se pudo cambiar el estado";
+      setErrorAccion(mensaje);
+      mostrarToast(mensaje, "error");
     }
   }
 
@@ -58,9 +74,12 @@ export default function DashboardOrganismos() {
     setErrorAccion("");
     try {
       await eliminarOrganismo(id);
+      mostrarToast("Organismo eliminado con exito");
       await recargar();
     } catch (err) {
-      setErrorAccion(err instanceof Error ? err.message : "No se pudo eliminar el organismo");
+      const mensaje = err instanceof Error ? err.message : "No se pudo eliminar el organismo";
+      setErrorAccion(mensaje);
+      mostrarToast(mensaje, "error");
     }
   }
 
@@ -78,7 +97,7 @@ export default function DashboardOrganismos() {
         />
 
         <label htmlFor="descripcionOrganismo">Descripcion (opcional)</label>
-        <input
+        <textarea
           id="descripcionOrganismo"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
@@ -105,12 +124,24 @@ export default function DashboardOrganismos() {
                 <button onClick={() => handleCambiarEstado(org.id, org.activo)}>
                   {org.activo === false ? "Activar" : "Desactivar"}
                 </button>
-                <button onClick={() => handleEliminar(org.id)}>Eliminar</button>
+                <button onClick={() => setPorEliminar(org)}>Eliminar</button>
               </span>
             </li>
           ))}
         {!cargando && organismos.length === 0 && <li>No hay organismos todavia.</li>}
       </ul>
+
+      {porEliminar && (
+        <ConfirmarEliminacion
+          titulo="Eliminar organismo"
+          mensaje={`¿Seguro que quieres eliminar "${porEliminar.nombre}"? Esta accion no se puede deshacer.`}
+          onConfirmar={() => {
+            setPorEliminar(null);
+            handleEliminar(porEliminar.id);
+          }}
+          onCancelar={() => setPorEliminar(null)}
+        />
+      )}
     </div>
   );
 }

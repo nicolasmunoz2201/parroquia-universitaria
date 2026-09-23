@@ -1,4 +1,4 @@
-import type { Usuario } from "../lib/api";
+import type { Usuario } from "../services/auth.service";
 
 export type Vista = "inicio" | "login" | "perfil" | "gestion" | "organismos";
 

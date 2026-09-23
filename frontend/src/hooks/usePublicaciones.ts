@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { listarPublicaciones } from "../lib/api";
-import type { Publicacion } from "../lib/api";
+import { listarPublicaciones } from "../services/publicacion.service";
+import type { Publicacion } from "../services/publicacion.service";
 
 export function usePublicaciones(opciones: { soloOrganismosActivos?: boolean } = {}) {
   const { soloOrganismosActivos } = opciones;

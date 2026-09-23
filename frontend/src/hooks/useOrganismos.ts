@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { listarOrganismos } from "../lib/api";
-import type { Organismo } from "../lib/api";
+import { listarOrganismos } from "../services/organismo.service";
+import type { Organismo } from "../services/organismo.service";
 
 export function useOrganismos(opciones: { soloActivos?: boolean } = {}) {
   const { soloActivos } = opciones;
