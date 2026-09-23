@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 
 const uploadDir = path.join(__dirname, "../../uploads");
+
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -27,4 +28,12 @@ function filtroImagen(
   cb(null, true);
 }
 
-export const uploadImagen = multer({ storage, fileFilter: filtroImagen });
+export const MAX_TAMANO_FOTO_MB = 5;
+
+export const uploadImagen = multer({
+  storage,
+  fileFilter: filtroImagen,
+  limits: { fileSize: MAX_TAMANO_FOTO_MB * 1024 * 1024 },
+});
+
+
