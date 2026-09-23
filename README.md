@@ -39,6 +39,7 @@ El seed crea un usuario con el correo `ADMIN_EMAIL` y contraseña `ADMIN_PASSWOR
 ```bash
 cd frontend
 npm install
+# crear .env con VITE_API_URL (URL del backend, por ejemplo http://localhost:3000)
 npm run dev
 ```
 
