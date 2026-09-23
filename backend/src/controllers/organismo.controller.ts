@@ -20,7 +20,8 @@ export async function obtener(req: Request, res: Response) {
 }
 
 export async function crear(req: Request, res: Response) {
-  const { nombre, descripcion } = req.body;
+  const { descripcion } = req.body;
+  const nombre = req.body.nombre?.trim();
   if (!nombre) {
     res.status(400).json({ message: "El campo 'nombre' es requerido" });
     return;
@@ -36,12 +37,20 @@ export async function crear(req: Request, res: Response) {
 }
 
 export async function actualizar(req: Request, res: Response) {
-  const { nombre, descripcion } = req.body;
-  if (nombre && !NOMBRE_VALIDO.test(nombre)) {
-    res.status(400).json({
-      message: "El nombre solo puede tener letras, numeros, espacios, puntos, comas y guiones",
-    });
-    return;
+  const { descripcion } = req.body;
+  const nombre = req.body.nombre !== undefined ? req.body.nombre.trim() : undefined;
+
+  if (nombre !== undefined) {
+    if (!nombre) {
+      res.status(400).json({ message: "El campo 'nombre' no puede quedar vacío" });
+      return;
+    }
+    if (!NOMBRE_VALIDO.test(nombre)) {
+      res.status(400).json({
+        message: "El nombre solo puede tener letras, numeros, espacios, puntos, comas y guiones",
+      });
+      return;
+    }
   }
 
   try {
