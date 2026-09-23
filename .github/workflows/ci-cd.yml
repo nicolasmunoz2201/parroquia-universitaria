@@ -69,3 +69,11 @@ jobs:
           pm2 delete parroquia-backend || true
           setsid pm2 start npm --name parroquia-backend -- run dev
           pm2 save
+
+      - name: Reiniciar Frontend con PM2
+        working-directory: frontend
+        run: |
+          export RUNNER_TRACKING_ID=""
+          pm2 delete parroquia-frontend || true
+          setsid pm2 start npm --name parroquia-frontend -- run preview
+          pm2 save
