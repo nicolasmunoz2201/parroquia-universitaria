@@ -1,0 +1,116 @@
+import { Request, Response } from "express";
+import fs from "fs";
+import path from "path";
+import * as publicacionService from "../services/publicacion.service";
+
+function eliminarArchivos(archivos: Express.Multer.File[]) {
+  for (const archivo of archivos) {
+    fs.unlink(archivo.path, () => {});
+  }
+}
+
+
+export async function listar(req: Request, res: Response) {
+  const soloOrganismosActivos = req.query.activos === "true";
+  const publicaciones = await publicacionService.listarPublicaciones({ soloOrganismosActivos });
+  res.json(publicaciones);
+}
+
+export async function crear(req: Request, res: Response) {
+  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
+  const { titulo, contenido, organismoId } = req.body;
+  if (!titulo || !contenido || !organismoId) {
+    eliminarArchivos(archivos);
+    res.status(400).json({ message: "titulo, contenido y organismoId son requeridos" });
+    return;
+  }
+
+  if (req.usuario!.rol === "ENCARGADO_ORGANISMO" && req.usuario!.organismoId !== organismoId) {
+    eliminarArchivos(archivos);
+    res.status(403).json({ message: "Solo puedes publicar para tu propio organismo" });
+    return;
+  }
+
+  const imagenes = archivos.map((archivo) => `/uploads/${archivo.filename}`);
+
+try {
+  const publicacion = await publicacionService.crearPublicacion({
+    titulo,
+    contenido,
+    imagenes,
+    autorId: req.usuario!.id,
+    organismoId,
+  });
+  res.status(201).json(publicacion);
+} catch (error) {
+  eliminarArchivos(archivos);
+  throw error;
+}
+}
+
+export async function actualizar(req: Request, res: Response) {
+  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
+  const existente = await publicacionService.obtenerPublicacion(req.params.id as string);
+  if (!existente) {
+    eliminarArchivos(archivos);
+    res.status(404).json({ message: "Publicacion no encontrada" });
+    return;
+  }
+
+  if (
+    req.usuario!.rol === "ENCARGADO_ORGANISMO" &&
+    req.usuario!.organismoId !== existente.organismo.id
+  ) {
+    eliminarArchivos(archivos);
+    res.status(403).json({ message: "Solo puedes editar publicaciones de tu propio organismo" });
+    return;
+  }
+
+  const { titulo, contenido } = req.body;
+try {
+  const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
+    ...(titulo ? { titulo } : {}),
+    ...(contenido ? { contenido } : {}),
+    ...(archivos.length > 0
+      ? { imagenes: archivos.map((archivo) => `/uploads/${archivo.filename}`) }
+      : {}),
+  });
+
+  if (archivos.length > 0) {
+    for (const imagenUrl of existente.imagenes) {
+      const rutaImagen = path.join(__dirname, "../..", imagenUrl);
+      fs.unlink(rutaImagen, () => {});
+    }
+  }
+
+  res.json(publicacion);
+} catch (error) {
+  eliminarArchivos(archivos);
+  throw error;
+}   
+}
+
+export async function eliminar(req: Request, res: Response) {
+  const publicacion = await publicacionService.obtenerPublicacion(req.params.id as string);
+  if (!publicacion) {
+    res.status(404).json({ message: "Publicacion no encontrada" });
+    return;
+  }
+
+  if (
+    req.usuario!.rol === "ENCARGADO_ORGANISMO" &&
+    req.usuario!.organismoId !== publicacion.organismo.id
+  ) {
+    res.status(403).json({ message: "Solo puedes eliminar publicaciones de tu propio organismo" });
+    return;
+  }
+
+  await publicacionService.eliminarPublicacion(req.params.id as string);
+
+  for (const imagenUrl of publicacion.imagenes) {
+    const rutaImagen = path.join(__dirname, "../..", imagenUrl);
+    fs.unlink(rutaImagen, () => {});
+  }
+
+  res.status(204).send();
+}

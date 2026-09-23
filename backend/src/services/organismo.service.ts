@@ -1,7 +1,8 @@
 import prisma from "../config/prisma";
 
-export function listarOrganismos() {
+export function listarOrganismos(opciones: { soloActivos?: boolean } = {}) {
   return prisma.organismo.findMany({
+    ...(opciones.soloActivos ? { where: { activo: true } } : {}),
     orderBy: { nombre: "asc" },
   });
 }

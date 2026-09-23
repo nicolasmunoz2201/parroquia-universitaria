@@ -16,7 +16,7 @@ export async function login(email: string, password: string) {
   }
 
   const token = jwt.sign(
-    { id: usuario.id, rol: usuario.rol },
+    { id: usuario.id, rol: usuario.rol, organismoId: usuario.organismoId },
     JWT_SECRET,
     { expiresIn: "8h" }
   );
@@ -28,6 +28,7 @@ export async function login(email: string, password: string) {
       nombre: usuario.nombre,
       email: usuario.email,
       rol: usuario.rol,
+      organismoId: usuario.organismoId,
     },
   };
 }

@@ -2,8 +2,11 @@ import { Request, Response } from "express";
 import { Prisma } from "../generated/prisma/client";
 import * as organismoService from "../services/organismo.service";
 
+const NOMBRE_VALIDO = /^[\p{L}\p{N} .,-]+$/u;
+
 export async function listar(req: Request, res: Response) {
-  const organismos = await organismoService.listarOrganismos();
+  const soloActivos = req.query.activo === "true";
+  const organismos = await organismoService.listarOrganismos({ soloActivos });
   res.json(organismos);
 }
 
@@ -17,9 +20,16 @@ export async function obtener(req: Request, res: Response) {
 }
 
 export async function crear(req: Request, res: Response) {
-  const { nombre, descripcion } = req.body;
+  const { descripcion } = req.body;
+  const nombre = req.body.nombre?.trim();
   if (!nombre) {
     res.status(400).json({ message: "El campo 'nombre' es requerido" });
+    return;
+  }
+  if (!NOMBRE_VALIDO.test(nombre)) {
+    res.status(400).json({
+      message: "El nombre solo puede tener letras, numeros, espacios, puntos, comas y guiones",
+    });
     return;
   }
   const organismo = await organismoService.crearOrganismo({ nombre, descripcion });
@@ -27,8 +37,23 @@ export async function crear(req: Request, res: Response) {
 }
 
 export async function actualizar(req: Request, res: Response) {
+  const { descripcion } = req.body;
+  const nombre = req.body.nombre !== undefined ? req.body.nombre.trim() : undefined;
+
+  if (nombre !== undefined) {
+    if (!nombre) {
+      res.status(400).json({ message: "El campo 'nombre' no puede quedar vacío" });
+      return;
+    }
+    if (!NOMBRE_VALIDO.test(nombre)) {
+      res.status(400).json({
+        message: "El nombre solo puede tener letras, numeros, espacios, puntos, comas y guiones",
+      });
+      return;
+    }
+  }
+
   try {
-    const { nombre, descripcion } = req.body;
     const organismo = await organismoService.actualizarOrganismo(req.params.id as string, {
       nombre,
       descripcion,

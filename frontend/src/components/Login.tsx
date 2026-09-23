@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { login } from "../lib/api";
-import type { Usuario } from "../lib/api";
+import { login } from "../services/auth.service";
+import type { Usuario } from "../services/auth.service";
 
 interface Props {
   onLogin: (usuario: Usuario) => void;
@@ -33,7 +33,7 @@ export default function Login({ onLogin }: Props) {
         <h1>Parroquia Universitaria UdeC</h1>
         <p className="login-subtitle">Panel administrativo</p>
 
-        <label htmlFor="email">Correo</label>
+        <label htmlFor="email">Correo electrónico</label>
         <input
           id="email"
           type="email"

@@ -1,3 +1,85 @@
+/* ---------- Notificaciones (toast) ---------- */
+.toast-contenedor {
+  position: fixed;
+  top: 76px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  min-width: 300px;
+  max-width: 420px;
+  padding: 16px 22px;
+  border-radius: 10px;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+  animation: toast-entrada 0.2s ease;
+}
+
+.toast-exito {
+  background: #2f7d4f;
+}
+
+.toast-error {
+  background: var(--error);
+}
+
+@keyframes toast-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-contenedor {
+    left: 16px;
+    right: 16px;
+  }
+
+  .toast {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* ---------- Tipografia institucional ---------- */
+h1,
+h2,
+.topbar-titulo,
+.sidebar-titulo {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+}
+
+.login-subtitle,
+.pagina-subtitulo {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+}
+
+/* ---------- Layout general ---------- */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-contenido {
+  flex: 1;
+}
+
 /* ---------- Login ---------- */
 .login-page {
   min-height: 100vh;
@@ -76,38 +158,144 @@
   font-size: 13px;
 }
 
-/* ---------- Dashboard ---------- */
-.dashboard {
-  min-height: 100vh;
-}
-
-.dashboard-header {
+/* ---------- Topbar ---------- */
+.topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 18px 32px;
+  gap: 14px;
+  padding: 14px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.dashboard-header h1 {
-  font-size: 17px;
-  margin: 0;
+.topbar-titulo {
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.dashboard-header p {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 2px 0 0;
-}
-
-.dashboard-header button {
-  padding: 8px 14px;
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 7px;
-  font-size: 13.5px;
   cursor: pointer;
+  flex: none;
+}
+
+.hamburger-btn span {
+  display: block;
+  height: 2px;
+  margin: 0 7px;
+  background: var(--ink);
+  border-radius: 1px;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 30, 0.35);
+  z-index: 20;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 260px;
+  max-width: 82vw;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 21;
+}
+
+.sidebar-abierto {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px 20px 10px;
+}
+
+.sidebar-titulo {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sidebar-cerrar {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.sidebar-cerrar:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.sidebar-link {
+  text-align: left;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink);
+  width: 100%;
+}
+
+.sidebar-link:hover {
+  background: var(--accent-soft);
+}
+
+.sidebar-link.activo {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- Dashboard ---------- */
+.dashboard {
+  min-height: calc(100vh - 53px);
 }
 
 .dashboard-body {
@@ -142,4 +330,394 @@
 .dashboard-info dd {
   margin: 0;
   font-size: 14.5px;
+}
+
+/* ---------- Pagina inicial ---------- */
+.pagina-inicial {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.pagina-inicial h1 {
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+
+.pagina-subtitulo {
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin: 0 0 32px;
+}
+
+.publicaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.publicacion-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.publicacion-carrusel {
+  position: relative;
+}
+
+.publicacion-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.carrusel-puntos {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.carrusel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(20, 22, 30, 0.45);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carrusel-flecha:hover {
+  background: rgba(20, 22, 30, 0.7);
+}
+
+.flecha-izquierda {
+  left: 10px;
+}
+
+.flecha-derecha {
+  right: 10px;
+}
+
+.punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.punto.activo {
+  background: #fff;
+}
+
+.publicacion-info {
+  padding: 16px 18px;
+}
+
+.publicacion-organismo {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a5c07;
+  background: var(--acento-secundario-soft);
+  padding: 3px 8px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+.publicacion-info h2 {
+  font-size: 16.5px;
+  margin: 0 0 6px;
+}
+
+.publicacion-info p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ---------- Gestion de publicaciones ---------- */
+.gestion-publicaciones {
+  max-width: 640px;
+  margin: 40px auto;
+  padding: 0 24px 64px;
+}
+
+.gestion-publicaciones h1 {
+  font-size: 22px;
+  margin: 0 0 20px;
+}
+
+.publicacion-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 28px;
+}
+
+.publicacion-form label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+.publicacion-form input,
+.publicacion-form textarea,
+.publicacion-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.publicacion-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.publicacion-form .boton-quitar-imagen {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.imagenes-preview {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.imagenes-preview li {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--accent-soft);
+}
+
+.imagenes-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.imagenes-preview li span {
+  display: block;
+  padding: 5px 8px;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imagenes-preview li button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  color: var(--error);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.imagenes-preview li button:hover {
+  background: #fff;
+}
+
+.publicacion-form input:focus,
+.publicacion-form textarea:focus,
+.publicacion-form select:focus {
+  border-color: var(--accent);
+}
+
+.publicacion-form button {
+  margin-top: 22px;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.publicacion-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.organismo-fijo {
+  margin: 14px 0 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.imagenes-actuales-hint {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.acciones-formulario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acciones-formulario button {
+  margin-top: 22px;
+}
+
+.acciones-formulario button[type="submit"] {
+  flex: 1;
+}
+
+.publicacion-form .boton-secundario {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.publicaciones-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.publicaciones-lista li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.publicaciones-lista button {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  flex: none;
+}
+
+.acciones-organismo {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.acciones-organismo button:first-child {
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+/* ---------- Dialogo de confirmacion ---------- */
+.dialogo-confirmacion {
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.35);
+}
+
+.dialogo-confirmacion::backdrop {
+  background: rgba(20, 22, 30, 0.45);
+}
+
+.dialogo-confirmacion h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.dialogo-confirmacion p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.dialogo-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.dialogo-acciones button {
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.dialogo-cancelar {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.dialogo-eliminar {
+  background: var(--error);
+  border: none;
+  color: #fff;
 }

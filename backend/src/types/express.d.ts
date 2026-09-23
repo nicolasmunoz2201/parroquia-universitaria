@@ -6,6 +6,7 @@ declare global {
       usuario?: {
         id: string;
         rol: string;
+        organismoId: string | null;
       };
     }
   }

@@ -13,7 +13,11 @@ export function requiereAutenticacion(req: Request, res: Response, next: NextFun
   const token = header.slice("Bearer ".length);
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as { id: string; rol: string };
+    const payload = jwt.verify(token, JWT_SECRET) as {
+      id: string;
+      rol: string;
+      organismoId: string | null;
+    };
     req.usuario = payload;
     next();
   } catch (error) {

@@ -1,10 +1,11 @@
-const API_URL = "http://localhost:3000";
+import { getToken, peticion } from "./api";
 
 export interface Usuario {
   id: string;
   nombre: string;
   email: string;
   rol: string;
+  organismoId: string | null;
 }
 
 interface LoginResponse {
@@ -13,18 +14,11 @@ interface LoginResponse {
 }
 
 export async function login(email: string, password: string): Promise<Usuario> {
-  const res = await fetch(`${API_URL}/api/auth/login`, {
+  const data = await peticion<LoginResponse>("/api/auth/login", "No se pudo iniciar sesion", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    json: { email, password },
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message ?? "No se pudo iniciar sesion");
-  }
-
-  const data: LoginResponse = await res.json();
   localStorage.setItem("token", data.token);
   localStorage.setItem("usuario", JSON.stringify(data.usuario));
   return data.usuario;
@@ -40,19 +34,12 @@ export function getUsuarioActual(): Usuario | null {
   return raw ? JSON.parse(raw) : null;
 }
 
-export function getToken(): string | null {
-  return localStorage.getItem("token");
-}
-
 export async function verificarToken(): Promise<boolean> {
-  const token = getToken();
-  if (!token) return false;
+  if (!getToken()) return false;
 
   try {
-    const res = await fetch(`${API_URL}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.ok;
+    await peticion("/api/auth/me", "Sesion invalida", { auth: true });
+    return true;
   } catch {
     return false;
   }
