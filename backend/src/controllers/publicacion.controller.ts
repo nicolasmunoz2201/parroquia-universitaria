@@ -17,18 +17,20 @@ export async function listar(req: Request, res: Response) {
 }
 
 export async function crear(req: Request, res: Response) {
+  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
   const { titulo, contenido, organismoId } = req.body;
   if (!titulo || !contenido || !organismoId) {
+    eliminarArchivos(archivos);
     res.status(400).json({ message: "titulo, contenido y organismoId son requeridos" });
     return;
   }
 
   if (req.usuario!.rol === "ENCARGADO_ORGANISMO" && req.usuario!.organismoId !== organismoId) {
+    eliminarArchivos(archivos);
     res.status(403).json({ message: "Solo puedes publicar para tu propio organismo" });
     return;
   }
 
-  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
   const imagenes = archivos.map((archivo) => `/uploads/${archivo.filename}`);
 
 try {
@@ -47,8 +49,10 @@ try {
 }
 
 export async function actualizar(req: Request, res: Response) {
+  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
   const existente = await publicacionService.obtenerPublicacion(req.params.id as string);
   if (!existente) {
+    eliminarArchivos(archivos);
     res.status(404).json({ message: "Publicacion no encontrada" });
     return;
   }
@@ -57,12 +61,12 @@ export async function actualizar(req: Request, res: Response) {
     req.usuario!.rol === "ENCARGADO_ORGANISMO" &&
     req.usuario!.organismoId !== existente.organismo.id
   ) {
+    eliminarArchivos(archivos);
     res.status(403).json({ message: "Solo puedes editar publicaciones de tu propio organismo" });
     return;
   }
 
   const { titulo, contenido } = req.body;
-  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
 try {
   const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
     ...(titulo ? { titulo } : {}),
