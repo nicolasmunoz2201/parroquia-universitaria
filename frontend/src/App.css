@@ -149,6 +149,63 @@ h2,
   cursor: default;
 }
 
+.campo-password {
+  position: relative;
+  display: flex;
+}
+
+.campo-password .campo-password-input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 44px;
+}
+
+.campo-password input::-ms-reveal,
+.campo-password input::-ms-clear {
+  display: none;
+}
+
+.campo-password .boton-ver-password {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  margin: 0;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--ink-soft);
+}
+
+.campo-password .boton-ver-password:hover {
+  color: var(--ink);
+}
+
+.boton-ver-password svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-cambio {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.login-card .login-link {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .login-error {
   margin: 10px 0 0;
   padding: 8px 10px;
@@ -369,11 +426,29 @@ h2,
   position: relative;
 }
 
-.publicacion-card img {
-  width: 100%;
+.publicacion-foto {
+  position: relative;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.publicacion-foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   display: block;
+}
+
+.publicacion-foto .publicacion-foto-fondo {
+  object-fit: cover;
+  filter: blur(20px) brightness(0.85);
+  transform: scale(1.15);
+}
+
+.publicacion-foto .publicacion-foto-principal {
+  object-fit: contain;
 }
 
 .carrusel-puntos {
@@ -500,6 +575,71 @@ h2,
 .publicacion-form textarea {
   min-height: 90px;
   resize: vertical;
+}
+
+.publicacion-form .input-archivo-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.publicacion-form .selector-fotos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 18px 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: center;
+  font-weight: 400;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.publicacion-form .selector-fotos:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.input-archivo-oculto:focus-visible + .selector-fotos {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.selector-fotos svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+}
+
+.selector-fotos-texto {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.selector-fotos-ayuda {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.publicacion-form .selector-fotos-lleno {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.publicacion-form .selector-fotos-lleno:hover {
+  border-color: var(--border);
+  background: var(--surface);
 }
 
 .publicacion-form .boton-quitar-imagen {
@@ -687,7 +827,7 @@ h2,
   margin: 0 0 8px;
 }
 
-.dialogo-confirmacion p {
+.dialogo-confirmacion > p {
   margin: 0;
   font-size: 14.5px;
   line-height: 1.5;
@@ -720,4 +860,139 @@ h2,
   background: var(--error);
   border: none;
   color: #fff;
+}
+
+.dialogo-confirmar {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+}
+
+.dialogo-confirmar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.dialogo-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.dialogo-form label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+
+.dialogo-form input,
+.dialogo-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+}
+
+.dialogo-form input:focus,
+.dialogo-form select:focus {
+  border-color: var(--accent);
+}
+
+.dialogo-ayuda {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Gestion de usuarios ---------- */
+.buscador {
+  position: relative;
+  margin: 0 0 12px;
+}
+
+.buscador svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.buscador input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+}
+
+.buscador input:focus {
+  border-color: var(--accent);
+}
+
+.publicaciones-lista .fila-usuario {
+  flex-wrap: wrap;
+}
+
+.fila-usuario-editable {
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.fila-usuario-editable:hover {
+  border-color: var(--accent);
+}
+
+.fila-usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.fila-usuario-info span {
+  font-size: 13px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fila-usuario-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.etiqueta-rol {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fila-usuario-organismo {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.publicaciones-lista .boton-editar {
+  border-color: var(--border);
+  color: var(--ink);
 }

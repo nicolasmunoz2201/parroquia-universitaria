@@ -4,10 +4,10 @@ import Dashboard from "./components/Dashboard";
 import PaginaInicial from "./components/PaginaInicial";
 import DashboardPublicaciones from "./components/DashboardPublicaciones";
 import DashboardOrganismos from "./components/DashboardOrganismos";
+import DashboardUsuarios from "./components/DashboardUsuarios";
 import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
-import { getToken } from "./services/api";
-import { getUsuarioActual, logout, verificarToken } from "./services/auth.service";
+import { logout, obtenerSesion } from "./services/auth.service";
 import type { Usuario } from "./services/auth.service";
 import "./App.css";
 
@@ -23,13 +23,9 @@ function App() {
 
   useEffect(() => {
     async function verificarSesion() {
-      if (!getToken()) {
-        setVerificando(false);
-        return;
-      }
-
-      if (await verificarToken()) {
-        setUsuario(getUsuarioActual());
+      const usuarioActual = await obtenerSesion();
+      if (usuarioActual) {
+        setUsuario(usuarioActual);
       } else {
         logout();
       }
@@ -87,6 +83,7 @@ function App() {
           <DashboardPublicaciones usuario={usuario} />
         )}
         {vista === "organismos" && usuario?.rol === "ADMINISTRADOR" && <DashboardOrganismos />}
+        {vista === "usuarios" && usuario?.rol === "ADMINISTRADOR" && <DashboardUsuarios />}
       </main>
     </div>
   );

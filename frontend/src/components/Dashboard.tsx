@@ -1,4 +1,5 @@
 import type { Usuario } from "../services/auth.service";
+import { ETIQUETAS_ROL } from "../services/usuario.service";
 
 interface Props {
   usuario: Usuario;
@@ -15,7 +16,13 @@ export default function Dashboard({ usuario }: Props) {
           <dt>Correo</dt>
           <dd>{usuario.email}</dd>
           <dt>Rol</dt>
-          <dd>{usuario.rol}</dd>
+          <dd>{ETIQUETAS_ROL[usuario.rol] ?? usuario.rol}</dd>
+          {usuario.organismo && (
+            <>
+              <dt>Organismo</dt>
+              <dd>{usuario.organismo.nombre}</dd>
+            </>
+          )}
         </dl>
       </main>
     </div>

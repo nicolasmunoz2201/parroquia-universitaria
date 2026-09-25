@@ -1,6 +1,6 @@
 import type { Usuario } from "../services/auth.service";
 
-export type Vista = "inicio" | "login" | "perfil" | "gestion" | "organismos";
+export type Vista = "inicio" | "login" | "perfil" | "gestion" | "organismos" | "usuarios";
 
 interface Props {
   usuario: Usuario | null;
@@ -67,6 +67,14 @@ export default function Sidebar({
               onClick={() => navegar("organismos")}
             >
               Organismos
+            </button>
+          )}
+          {esAdmin && (
+            <button
+              className={`sidebar-link ${vistaActual === "usuarios" ? "activo" : ""}`}
+              onClick={() => navegar("usuarios")}
+            >
+              Usuarios
             </button>
           )}
         </nav>

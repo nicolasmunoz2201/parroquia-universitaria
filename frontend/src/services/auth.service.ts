@@ -1,11 +1,13 @@
 import { getToken, peticion } from "./api";
+import type { Rol } from "./usuario.service";
 
 export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  rol: string;
+  rol: Rol;
   organismoId: string | null;
+  organismo?: { id: string; nombre: string } | null;
 }
 
 interface LoginResponse {
@@ -13,15 +15,26 @@ interface LoginResponse {
   usuario: Usuario;
 }
 
+function guardarSesion(data: LoginResponse): Usuario {
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("usuario", JSON.stringify(data.usuario));
+  return data.usuario;
+}
+
 export async function login(email: string, password: string): Promise<Usuario> {
   const data = await peticion<LoginResponse>("/api/auth/login", "No se pudo iniciar sesion", {
     method: "POST",
     json: { email, password },
   });
+  return guardarSesion(data);
+}
 
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("usuario", JSON.stringify(data.usuario));
-  return data.usuario;
+export async function registrar(nombre: string, email: string, password: string): Promise<Usuario> {
+  const data = await peticion<LoginResponse>("/api/auth/registro", "No se pudo crear la cuenta", {
+    method: "POST",
+    json: { nombre, email, password },
+  });
+  return guardarSesion(data);
 }
 
 export function logout() {
@@ -29,18 +42,17 @@ export function logout() {
   localStorage.removeItem("usuario");
 }
 
-export function getUsuarioActual(): Usuario | null {
-  const raw = localStorage.getItem("usuario");
-  return raw ? JSON.parse(raw) : null;
-}
-
-export async function verificarToken(): Promise<boolean> {
-  if (!getToken()) return false;
+export async function obtenerSesion(): Promise<Usuario | null> {
+  if (!getToken()) return null;
 
   try {
-    await peticion("/api/auth/me", "Sesion invalida", { auth: true });
-    return true;
+    const data = await peticion<{ usuario: Usuario | null }>("/api/auth/me", "Sesion invalida", {
+      auth: true,
+    });
+    if (!data.usuario) return null;
+    localStorage.setItem("usuario", JSON.stringify(data.usuario));
+    return data.usuario;
   } catch {
-    return false;
+    return null;
   }
 }
