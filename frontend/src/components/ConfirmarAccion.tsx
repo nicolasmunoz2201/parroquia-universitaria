@@ -3,11 +3,20 @@ import { useEffect, useRef } from "react";
 interface Props {
   titulo: string;
   mensaje: string;
+  textoConfirmar: string;
+  peligro?: boolean;
   onConfirmar: () => void;
   onCancelar: () => void;
 }
 
-export default function ConfirmarEliminacion({ titulo, mensaje, onConfirmar, onCancelar }: Props) {
+export default function ConfirmarAccion({
+  titulo,
+  mensaje,
+  textoConfirmar,
+  peligro = false,
+  onConfirmar,
+  onCancelar,
+}: Props) {
   const dialogoRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -24,8 +33,12 @@ export default function ConfirmarEliminacion({ titulo, mensaje, onConfirmar, onC
         <button type="button" className="dialogo-cancelar" onClick={onCancelar}>
           Cancelar
         </button>
-        <button type="button" className="dialogo-eliminar" onClick={onConfirmar}>
-          Eliminar
+        <button
+          type="button"
+          className={peligro ? "dialogo-eliminar" : "dialogo-confirmar"}
+          onClick={onConfirmar}
+        >
+          {textoConfirmar}
         </button>
       </div>
     </dialog>

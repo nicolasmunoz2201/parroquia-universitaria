@@ -10,7 +10,7 @@ import type { Usuario } from "../services/auth.service";
 import { usePublicaciones } from "../hooks/usePublicaciones";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
-import ConfirmarEliminacion from "./ConfirmarEliminacion";
+import ConfirmarAccion from "./ConfirmarAccion";
 
 const MAX_FOTOS = 3;
 const MAX_TAMANO_FOTO_MB = 5;
@@ -44,6 +44,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [errorEliminar, setErrorEliminar] = useState("");
   const [porEliminar, setPorEliminar] = useState<Publicacion | null>(null);
+  const [confirmandoEnvio, setConfirmandoEnvio] = useState(false);
   const inputImagenRef = useRef<HTMLInputElement>(null);
 
   const publicacionesGestionables = publicaciones.filter(
@@ -106,21 +107,26 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     setError("");
   }
 
-  async function handleSubmit(e: FormEvent) {
+  const organismoDestino = esAdmin ? organismoId : usuario.organismoId;
+
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
 
+    if (!editando && !organismoDestino) {
+      setError("Selecciona un organismo");
+      return;
+    }
+
+    setConfirmandoEnvio(true);
+  }
+
+  async function enviarPublicacion() {
     const formData = new FormData();
     formData.append("titulo", titulo);
     formData.append("contenido", contenido);
     imagenes.forEach((imagen) => formData.append("imagenes", imagen.archivo));
-
-    if (!editando) {
-      const organismoDestino = esAdmin ? organismoId : usuario.organismoId;
-      if (!organismoDestino) {
-        setError("Selecciona un organismo");
-        return;
-      }
+    if (!editando && organismoDestino) {
       formData.append("organismoId", organismoDestino);
     }
 
@@ -213,6 +219,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
         )}
         <input
           id="imagen"
+          className="input-archivo-oculto"
           ref={inputImagenRef}
           type="file"
           accept="image/*"
@@ -220,6 +227,26 @@ export default function DashboardPublicaciones({ usuario }: Props) {
           disabled={imagenes.length >= MAX_FOTOS}
           onChange={handleImagenesChange}
         />
+        <label
+          htmlFor="imagen"
+          className={`selector-fotos ${imagenes.length >= MAX_FOTOS ? "selector-fotos-lleno" : ""}`}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+            <circle cx="9" cy="10" r="1.6" fill="currentColor" />
+            <path d="M4 17l5-5 4 4 2.5-2.5L20 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          </svg>
+          <span className="selector-fotos-texto">
+            {imagenes.length >= MAX_FOTOS
+              ? "Llegaste al máximo de fotos"
+              : imagenes.length > 0
+                ? "Agregar más fotos"
+                : "Elegir fotos"}
+          </span>
+          <span className="selector-fotos-ayuda">
+            {imagenes.length} de {MAX_FOTOS} fotos · máximo {MAX_TAMANO_FOTO_MB} MB cada una
+          </span>
+        </label>
 
         {imagenes.length > 0 && (
           <>
@@ -275,10 +302,31 @@ export default function DashboardPublicaciones({ usuario }: Props) {
         {publicacionesGestionables.length === 0 && <li>No hay publicaciones todavia.</li>}
       </ul>
 
+      {confirmandoEnvio && (
+        <ConfirmarAccion
+          titulo={editando ? "Guardar cambios" : "Publicar"}
+          mensaje={
+            editando
+              ? `¿Guardar los cambios de "${titulo.trim()}"?`
+              : `¿Publicar "${titulo.trim()}"${
+                  imagenes.length > 0 ? ` con ${imagenes.length} foto(s)` : " sin fotos"
+                }?`
+          }
+          textoConfirmar={editando ? "Guardar" : "Publicar"}
+          onConfirmar={() => {
+            setConfirmandoEnvio(false);
+            enviarPublicacion();
+          }}
+          onCancelar={() => setConfirmandoEnvio(false)}
+        />
+      )}
+
       {porEliminar && (
-        <ConfirmarEliminacion
+        <ConfirmarAccion
           titulo="Eliminar publicacion"
           mensaje={`¿Seguro que quieres eliminar "${porEliminar.titulo}"? Esta accion no se puede deshacer.`}
+          textoConfirmar="Eliminar"
+          peligro
           onConfirmar={() => {
             setPorEliminar(null);
             handleEliminar(porEliminar.id);

@@ -9,7 +9,7 @@ import {
 import type { Organismo } from "../services/organismo.service";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
-import ConfirmarEliminacion from "./ConfirmarEliminacion";
+import ConfirmarAccion from "./ConfirmarAccion";
 
 const NOMBRE_ORGANISMO_REGEX = /^[\p{L}\p{N} .,-]+$/u;
 
@@ -132,9 +132,11 @@ export default function DashboardOrganismos() {
       </ul>
 
       {porEliminar && (
-        <ConfirmarEliminacion
+        <ConfirmarAccion
           titulo="Eliminar organismo"
           mensaje={`¿Seguro que quieres eliminar "${porEliminar.nombre}"? Esta accion no se puede deshacer.`}
+          textoConfirmar="Eliminar"
+          peligro
           onConfirmar={() => {
             setPorEliminar(null);
             handleEliminar(porEliminar.id);
