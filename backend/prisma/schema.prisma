@@ -25,6 +25,8 @@ model Usuario {
   email         String          @unique
   password      String
   tokenVersion  Int             @default(0)
+  recuperacionHash   String?   @unique
+  recuperacionExpira DateTime?
   rol           Rol
   organismo     Organismo?      @relation(fields: [organismoId], references: [id])
   organismoId   String?

@@ -1,6 +1,13 @@
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import prisma from "../config/prisma";
 import type { Rol } from "../generated/prisma/client";
+import { HORAS_VALIDEZ_RECUPERACION } from "../utils/correo";
+
+// En la base solo se guarda el hash del codigo, asi quien lea la tabla no puede usar el enlace.
+function hashearCodigo(codigo: string) {
+  return crypto.createHash("sha256").update(codigo).digest("hex");
+}
 
 const SELECT_SEGURO = {
   id: true,
@@ -49,8 +56,53 @@ export async function cambiarPassword(id: string, password: string) {
   const passwordHasheada = await bcrypt.hash(password, 10);
   const { tokenVersion } = await prisma.usuario.update({
     where: { id },
-    data: { password: passwordHasheada, tokenVersion: { increment: 1 } },
+    data: {
+      password: passwordHasheada,
+      tokenVersion: { increment: 1 },
+      recuperacionHash: null,
+      recuperacionExpira: null,
+    },
     select: { tokenVersion: true },
   });
   return tokenVersion;
+}
+
+export async function crearCodigoRecuperacion(id: string) {
+  const codigo = crypto.randomBytes(32).toString("hex");
+  await prisma.usuario.update({
+    where: { id },
+    data: {
+      recuperacionHash: hashearCodigo(codigo),
+      recuperacionExpira: new Date(Date.now() + HORAS_VALIDEZ_RECUPERACION * 60 * 60 * 1000),
+    },
+  });
+  return codigo;
+}
+
+export async function anularCodigoRecuperacion(id: string) {
+  await prisma.usuario.update({
+    where: { id },
+    data: { recuperacionHash: null, recuperacionExpira: null },
+  });
+}
+
+export async function restablecerPassword(codigo: string, password: string) {
+  const recuperacionHash = hashearCodigo(codigo);
+  const usuario = await prisma.usuario.findUnique({ where: { recuperacionHash } });
+  if (!usuario?.recuperacionExpira || usuario.recuperacionExpira < new Date()) {
+    return false;
+  }
+
+  const passwordHasheada = await bcrypt.hash(password, 10);
+  // El where incluye el hash para que dos usos simultaneos del mismo enlace no pasen ambos.
+  const { count } = await prisma.usuario.updateMany({
+    where: { id: usuario.id, recuperacionHash },
+    data: {
+      password: passwordHasheada,
+      tokenVersion: { increment: 1 },
+      recuperacionHash: null,
+      recuperacionExpira: null,
+    },
+  });
+  return count === 1;
 }

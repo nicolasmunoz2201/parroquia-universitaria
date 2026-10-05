@@ -23,6 +23,14 @@ export const limiteCambioPassword = rateLimit({
   message: { message: "Demasiados intentos de cambiar la contraseña. Espera 15 minutos e intenta de nuevo." },
 });
 
+export const limiteRestablecer = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Demasiados intentos de restablecer la contraseña. Espera 15 minutos e intenta de nuevo." },
+});
+
 export const limiteRegistro = rateLimit({
   windowMs: UNA_HORA,
   limit: 30,
