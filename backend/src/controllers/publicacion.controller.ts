@@ -5,6 +5,16 @@ import * as publicacionService from "../services/publicacion.service";
 import * as organismoService from "../services/organismo.service";
 import { eliminarArchivos } from "../middlewares/upload.middleware";
 
+function puedeGestionarOrganismo(usuario: Request["usuario"], organismoId: string) {
+  return usuario?.rol === "ADMINISTRADOR" || usuario?.organismoId === organismoId;
+}
+
+function eliminarImagenesGuardadas(imagenes: string[]) {
+  for (const imagenUrl of imagenes) {
+    fs.unlink(path.join(__dirname, "../..", imagenUrl), () => {});
+  }
+}
+
 export async function listar(req: Request, res: Response) {
   const soloOrganismosActivos = req.query.activos === "true";
   const publicaciones = await publicacionService.listarPublicaciones({ soloOrganismosActivos });
@@ -20,7 +30,7 @@ export async function crear(req: Request, res: Response) {
     return;
   }
 
-  if (req.usuario!.rol === "ENCARGADO_ORGANISMO" && req.usuario!.organismoId !== organismoId) {
+  if (!puedeGestionarOrganismo(req.usuario, organismoId)) {
     eliminarArchivos(archivos);
     res.status(403).json({ message: "Solo puedes publicar para tu propio organismo" });
     return;
@@ -40,19 +50,19 @@ export async function crear(req: Request, res: Response) {
 
   const imagenes = archivos.map((archivo) => `/uploads/${archivo.filename}`);
 
-try {
-  const publicacion = await publicacionService.crearPublicacion({
-    titulo,
-    contenido,
-    imagenes,
-    autorId: req.usuario!.id,
-    organismoId,
-  });
-  res.status(201).json(publicacion);
-} catch (error) {
-  eliminarArchivos(archivos);
-  throw error;
-}
+  try {
+    const publicacion = await publicacionService.crearPublicacion({
+      titulo,
+      contenido,
+      imagenes,
+      autorId: req.usuario!.id,
+      organismoId,
+    });
+    res.status(201).json(publicacion);
+  } catch (error) {
+    eliminarArchivos(archivos);
+    throw error;
+  }
 }
 
 export async function actualizar(req: Request, res: Response) {
@@ -64,37 +74,31 @@ export async function actualizar(req: Request, res: Response) {
     return;
   }
 
-  if (
-    req.usuario!.rol === "ENCARGADO_ORGANISMO" &&
-    req.usuario!.organismoId !== existente.organismo.id
-  ) {
+  if (!puedeGestionarOrganismo(req.usuario, existente.organismo.id)) {
     eliminarArchivos(archivos);
     res.status(403).json({ message: "Solo puedes editar publicaciones de tu propio organismo" });
     return;
   }
 
   const { titulo, contenido } = req.body;
-try {
-  const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
-    ...(titulo ? { titulo } : {}),
-    ...(contenido ? { contenido } : {}),
-    ...(archivos.length > 0
-      ? { imagenes: archivos.map((archivo) => `/uploads/${archivo.filename}`) }
-      : {}),
-  });
+  try {
+    const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
+      ...(titulo ? { titulo } : {}),
+      ...(contenido ? { contenido } : {}),
+      ...(archivos.length > 0
+        ? { imagenes: archivos.map((archivo) => `/uploads/${archivo.filename}`) }
+        : {}),
+    });
 
-  if (archivos.length > 0) {
-    for (const imagenUrl of existente.imagenes) {
-      const rutaImagen = path.join(__dirname, "../..", imagenUrl);
-      fs.unlink(rutaImagen, () => {});
+    if (archivos.length > 0) {
+      eliminarImagenesGuardadas(existente.imagenes);
     }
-  }
 
-  res.json(publicacion);
-} catch (error) {
-  eliminarArchivos(archivos);
-  throw error;
-}   
+    res.json(publicacion);
+  } catch (error) {
+    eliminarArchivos(archivos);
+    throw error;
+  }
 }
 
 export async function eliminar(req: Request, res: Response) {
@@ -104,20 +108,13 @@ export async function eliminar(req: Request, res: Response) {
     return;
   }
 
-  if (
-    req.usuario!.rol === "ENCARGADO_ORGANISMO" &&
-    req.usuario!.organismoId !== publicacion.organismo.id
-  ) {
+  if (!puedeGestionarOrganismo(req.usuario, publicacion.organismo.id)) {
     res.status(403).json({ message: "Solo puedes eliminar publicaciones de tu propio organismo" });
     return;
   }
 
   await publicacionService.eliminarPublicacion(req.params.id as string);
-
-  for (const imagenUrl of publicacion.imagenes) {
-    const rutaImagen = path.join(__dirname, "../..", imagenUrl);
-    fs.unlink(rutaImagen, () => {});
-  }
+  eliminarImagenesGuardadas(publicacion.imagenes);
 
   res.status(204).send();
 }
