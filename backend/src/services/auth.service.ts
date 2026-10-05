@@ -59,8 +59,6 @@ export async function registrar(nombre: string, email: string, password: string)
   return crearSesion(usuario, 0);
 }
 
-// Devuelve una sesion nueva para que el usuario siga conectado; las demas
-// sesiones quedan invalidas porque cambiarPassword sube tokenVersion.
 export async function cambiarPasswordPropia(id: string, passwordActual: string, passwordNueva: string) {
   const usuario = await prisma.usuario.findUnique({
     where: { id },

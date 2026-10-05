@@ -19,7 +19,6 @@ export async function enviarCorreoRecuperacion(destino: { nombre: string; email:
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
-    // Google muestra la clave de aplicacion en grupos con espacios; se aceptan con o sin ellos.
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS?.replace(/\s/g, "") },
   });
 

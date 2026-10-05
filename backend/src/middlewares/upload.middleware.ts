@@ -11,8 +11,6 @@ function empiezaCon(inicio: Buffer, bytes: number[]) {
   return bytes.every((byte, i) => inicio[i] === byte);
 }
 
-// Cada tipo permitido define la extension con que se guarda y como reconocerlo
-// por sus primeros bytes, porque el tipo que manda el navegador se puede falsificar.
 const TIPOS_DE_IMAGEN: Record<string, { extension: string; esValida: (inicio: Buffer) => boolean }> = {
   "image/jpeg": {
     extension: ".jpg",

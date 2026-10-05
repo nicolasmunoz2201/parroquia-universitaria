@@ -13,7 +13,6 @@ export const limiteLogin = rateLimit({
   message: { message: "Demasiados intentos de inicio de sesion. Espera 15 minutos e intenta de nuevo." },
 });
 
-// Va despues de requiereAutenticacion, asi cuenta los intentos por usuario.
 export const limiteCambioPassword = rateLimit({
   windowMs: QUINCE_MINUTOS,
   limit: 10,

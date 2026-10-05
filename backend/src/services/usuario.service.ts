@@ -4,7 +4,6 @@ import prisma from "../config/prisma";
 import type { Rol } from "../generated/prisma/client";
 import { HORAS_VALIDEZ_RECUPERACION } from "../utils/correo";
 
-// En la base solo se guarda el hash del codigo, asi quien lea la tabla no puede usar el enlace.
 function hashearCodigo(codigo: string) {
   return crypto.createHash("sha256").update(codigo).digest("hex");
 }
@@ -94,7 +93,6 @@ export async function restablecerPassword(codigo: string, password: string) {
   }
 
   const passwordHasheada = await bcrypt.hash(password, 10);
-  // El where incluye el hash para que dos usos simultaneos del mismo enlace no pasen ambos.
   const { count } = await prisma.usuario.updateMany({
     where: { id: usuario.id, recuperacionHash },
     data: {

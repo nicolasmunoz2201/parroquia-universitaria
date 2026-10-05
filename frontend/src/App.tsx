@@ -21,7 +21,6 @@ function App() {
   const [verificando, setVerificando] = useState(true);
   const [vista, setVista] = useState<Vista>("inicio");
   const [sidebarAbierto, setSidebarAbierto] = useState(false);
-  // El enlace del correo de recuperacion llega como ?restablecer=<codigo>
   const [codigoRecuperacion, setCodigoRecuperacion] = useState(() =>
     new URLSearchParams(window.location.search).get("restablecer")
   );
