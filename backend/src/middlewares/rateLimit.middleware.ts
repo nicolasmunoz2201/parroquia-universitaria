@@ -12,6 +12,7 @@ const MS_POR_MINUTO = 60 * 1000;
 export const limiteLogin = rateLimit({
   windowMs: LIMITE_LOGIN.minutos * MS_POR_MINUTO,
   limit: LIMITE_LOGIN.intentos,
+  skipSuccessfulRequests: true,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   keyGenerator: (req) => leerEmail(req.body?.email) ?? ipKeyGenerator(req.ip ?? ""),
