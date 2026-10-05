@@ -19,6 +19,13 @@
   gap: 6px;
 }
 
+.login-logo {
+  align-self: center;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+}
+
 .login-card h1 {
   font-size: 20px;
   margin: 0 0 2px;

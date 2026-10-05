@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { restablecerPassword } from "../services/auth.service";
 import CampoPassword from "./CampoPassword";
+import logoParroquia from "../assets/logo-parroquia.jpg";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 interface Props {
@@ -53,6 +54,7 @@ export default function RestablecerPassword({ codigo, onTerminar }: Props) {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={handleSubmit}>
+        <img src={logoParroquia} alt="Parroquia Universitaria Concepción" className="login-logo" />
         <h1>Parroquia Universitaria UdeC</h1>
         <p className="login-subtitle">Crea tu nueva contraseña</p>
 

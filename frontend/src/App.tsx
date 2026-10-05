@@ -10,6 +10,7 @@ import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
 import { logout, obtenerSesion } from "./services/auth.service";
 import type { Usuario } from "./services/auth.service";
+import logoIcono from "./assets/logo-icono.png";
 import "./App.css";
 
 function puedeGestionarPublicaciones(usuario: Usuario | null) {
@@ -79,6 +80,7 @@ function App() {
           <span />
           <span />
         </button>
+        <img src={logoIcono} alt="" className="topbar-logo" />
         <span className="topbar-titulo">Parroquia Universitaria UdeC</span>
       </header>
 

@@ -12,6 +12,7 @@
   --error-soft: #fce6e8;
   --fuente-titulos: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   --fuente-texto: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --alto-topbar: 72px;
   color-scheme: light;
 }
 

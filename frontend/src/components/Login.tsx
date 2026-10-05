@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { login, registrar } from "../services/auth.service";
 import type { Usuario } from "../services/auth.service";
 import CampoPassword from "./CampoPassword";
+import logoParroquia from "../assets/logo-parroquia.jpg";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 interface Props {
@@ -51,6 +52,7 @@ export default function Login({ onLogin }: Props) {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={handleSubmit}>
+        <img src={logoParroquia} alt="Parroquia Universitaria Concepción" className="login-logo" />
         <h1>Parroquia Universitaria UdeC</h1>
         <p className="login-subtitle">{esRegistro ? "Crea tu cuenta" : "Inicia sesión en tu cuenta"}</p>
 
