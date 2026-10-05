@@ -1,6 +1,6 @@
 .toast-contenedor {
   position: fixed;
-  top: 76px;
+  top: calc(var(--alto-topbar) + 16px);
   right: 20px;
   display: flex;
   flex-direction: column;
