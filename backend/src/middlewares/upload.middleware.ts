@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { BYTES_POR_MB, MAX_TAMANO_FOTO_MB } from "../constants/archivos";
 
 const uploadDir = path.join(__dirname, "../../uploads");
 
@@ -49,12 +50,10 @@ function filtroImagen(
   cb(null, true);
 }
 
-export const MAX_TAMANO_FOTO_MB = 5;
-
 export const uploadImagen = multer({
   storage,
   fileFilter: filtroImagen,
-  limits: { fileSize: MAX_TAMANO_FOTO_MB * 1024 * 1024 },
+  limits: { fileSize: MAX_TAMANO_FOTO_MB * BYTES_POR_MB },
 });
 
 export function eliminarArchivos(archivos: Express.Multer.File[]) {

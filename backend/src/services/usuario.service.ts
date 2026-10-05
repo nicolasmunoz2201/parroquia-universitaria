@@ -2,7 +2,7 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import prisma from "../config/prisma";
 import type { Rol } from "../generated/prisma/client";
-import { HORAS_VALIDEZ_RECUPERACION } from "../utils/correo";
+import { HORAS_VALIDEZ_RECUPERACION, RONDAS_BCRYPT } from "../constants/autenticacion";
 
 function hashearCodigo(codigo: string) {
   return crypto.createHash("sha256").update(codigo).digest("hex");
@@ -32,7 +32,7 @@ export async function crearUsuario(data: {
   rol: Rol;
   organismoId: string | null;
 }) {
-  const passwordHasheada = await bcrypt.hash(data.password, 10);
+  const passwordHasheada = await bcrypt.hash(data.password, RONDAS_BCRYPT);
   return prisma.usuario.create({
     data: { ...data, password: passwordHasheada },
     select: SELECT_SEGURO,
@@ -52,7 +52,7 @@ export function actualizarRolUsuario(id: string, data: { rol: Rol; organismoId: 
 }
 
 export async function cambiarPassword(id: string, password: string) {
-  const passwordHasheada = await bcrypt.hash(password, 10);
+  const passwordHasheada = await bcrypt.hash(password, RONDAS_BCRYPT);
   const { tokenVersion } = await prisma.usuario.update({
     where: { id },
     data: {
@@ -92,7 +92,7 @@ export async function restablecerPassword(codigo: string, password: string) {
     return false;
   }
 
-  const passwordHasheada = await bcrypt.hash(password, 10);
+  const passwordHasheada = await bcrypt.hash(password, RONDAS_BCRYPT);
   const { count } = await prisma.usuario.updateMany({
     where: { id: usuario.id, recuperacionHash },
     data: {

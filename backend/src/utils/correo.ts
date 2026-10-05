@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
-
-export const HORAS_VALIDEZ_RECUPERACION = 1;
+import { HORAS_VALIDEZ_RECUPERACION } from "../constants/autenticacion";
+import { NOMBRE_REMITENTE, SMTP_HOST, SMTP_PUERTO } from "../constants/correo";
 
 export function correoConfigurado() {
   return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS && process.env.FRONTEND_URL);
@@ -16,8 +16,8 @@ function escaparHtml(texto: string) {
 
 export async function enviarCorreoRecuperacion(destino: { nombre: string; email: string }, codigo: string) {
   const transporte = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
+    host: SMTP_HOST,
+    port: SMTP_PUERTO,
     secure: false,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS?.replace(/\s/g, "") },
   });
@@ -26,7 +26,7 @@ export async function enviarCorreoRecuperacion(destino: { nombre: string; email:
   const validez = `${HORAS_VALIDEZ_RECUPERACION} hora`;
 
   await transporte.sendMail({
-    from: `"Parroquia Universitaria UdeC" <${process.env.SMTP_USER}>`,
+    from: `"${NOMBRE_REMITENTE}" <${process.env.SMTP_USER}>`,
     to: destino.email,
     subject: "Recupera tu contraseña",
     text:

@@ -11,10 +11,13 @@ import { usePublicaciones } from "../hooks/usePublicaciones";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
 import ConfirmarAccion from "./ConfirmarAccion";
+import {
+  BYTES_POR_MB,
+  MAX_FOTOS_POR_PUBLICACION,
+  MAX_TAMANO_FOTO_MB,
+  TIPOS_FOTO,
+} from "../constants/archivos";
 
-const MAX_FOTOS = 3;
-const MAX_TAMANO_FOTO_MB = 5;
-const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
 
 interface ImagenSeleccionada {
   archivo: File;
@@ -69,8 +72,8 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     const nuevosArchivos = Array.from(e.target.files ?? []);
     e.target.value = "";
 
-    if (imagenes.length + nuevosArchivos.length > MAX_FOTOS) {
-      setError(`Puedes subir hasta ${MAX_FOTOS} fotos por publicacion`);
+    if (imagenes.length + nuevosArchivos.length > MAX_FOTOS_POR_PUBLICACION) {
+      setError(`Puedes subir hasta ${MAX_FOTOS_POR_PUBLICACION} fotos por publicacion`);
       return;
     }
 
@@ -81,7 +84,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     }
 
     const fotoPesada = nuevosArchivos.find(
-      (archivo) => archivo.size > MAX_TAMANO_FOTO_MB * 1024 * 1024
+      (archivo) => archivo.size > MAX_TAMANO_FOTO_MB * BYTES_POR_MB
     );
     if (fotoPesada) {
       setError(`"${fotoPesada.name}" pesa mas de ${MAX_TAMANO_FOTO_MB} MB`);
@@ -216,7 +219,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
             </>
           ))}
 
-        <label htmlFor="imagen">Fotos (maximo {MAX_FOTOS})</label>
+        <label htmlFor="imagen">Fotos (maximo {MAX_FOTOS_POR_PUBLICACION})</label>
         {editando && (
           <p className="imagenes-actuales-hint">
             {editando.imagenes.length > 0
@@ -231,12 +234,12 @@ export default function DashboardPublicaciones({ usuario }: Props) {
           type="file"
           accept={TIPOS_FOTO.join(",")}
           multiple
-          disabled={imagenes.length >= MAX_FOTOS}
+          disabled={imagenes.length >= MAX_FOTOS_POR_PUBLICACION}
           onChange={handleImagenesChange}
         />
         <label
           htmlFor="imagen"
-          className={`selector-fotos ${imagenes.length >= MAX_FOTOS ? "selector-fotos-lleno" : ""}`}
+          className={`selector-fotos ${imagenes.length >= MAX_FOTOS_POR_PUBLICACION ? "selector-fotos-lleno" : ""}`}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -244,14 +247,14 @@ export default function DashboardPublicaciones({ usuario }: Props) {
             <path d="M4 17l5-5 4 4 2.5-2.5L20 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
           </svg>
           <span className="selector-fotos-texto">
-            {imagenes.length >= MAX_FOTOS
+            {imagenes.length >= MAX_FOTOS_POR_PUBLICACION
               ? "Llegaste al máximo de fotos"
               : imagenes.length > 0
                 ? "Agregar más fotos"
                 : "Elegir fotos"}
           </span>
           <span className="selector-fotos-ayuda">
-            {imagenes.length} de {MAX_FOTOS} fotos · JPG, PNG o WEBP · máximo {MAX_TAMANO_FOTO_MB} MB cada una
+            {imagenes.length} de {MAX_FOTOS_POR_PUBLICACION} fotos · JPG, PNG o WEBP · máximo {MAX_TAMANO_FOTO_MB} MB cada una
           </span>
         </label>
 

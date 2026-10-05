@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
 import { Rol } from "../generated/prisma/client";
 import * as usuarioService from "./usuario.service";
+import { DURACION_SESION } from "../constants/autenticacion";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -27,7 +28,7 @@ function datosPublicos(usuario: DatosSesion) {
 }
 
 function crearSesion(usuario: DatosSesion, tokenVersion: number) {
-  const token = jwt.sign({ id: usuario.id, v: tokenVersion }, JWT_SECRET, { expiresIn: "8h" });
+  const token = jwt.sign({ id: usuario.id, v: tokenVersion }, JWT_SECRET, { expiresIn: DURACION_SESION });
   return { token, usuario: datosPublicos(usuario) };
 }
 

@@ -13,6 +13,7 @@ import { useUsuarios } from "../hooks/useUsuarios";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
 import CampoPassword from "./CampoPassword";
+import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 const ROLES_ASIGNABLES: Rol[] = ["FELIGRES", "ENCARGADO_ORGANISMO", "ENCARGADO_COMEDOR"];
 
@@ -207,7 +208,7 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
           id="editarPassword"
           value={password}
           onChange={setPassword}
-          minLength={6}
+          minLength={LARGO_MINIMO_PASSWORD}
           autoComplete="new-password"
         />
         <p className="dialogo-ayuda">Déjala vacía si no quieres cambiarla.</p>
@@ -333,7 +334,7 @@ export default function DashboardUsuarios() {
           id="passwordUsuario"
           value={password}
           onChange={setPassword}
-          minLength={6}
+          minLength={LARGO_MINIMO_PASSWORD}
           autoComplete="new-password"
           required
         />

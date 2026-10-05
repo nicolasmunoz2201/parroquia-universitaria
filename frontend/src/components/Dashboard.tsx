@@ -5,6 +5,7 @@ import type { Usuario } from "../services/auth.service";
 import { ETIQUETAS_ROL } from "../services/usuario.service";
 import { useToast } from "../context/ToastContext";
 import CampoPassword from "./CampoPassword";
+import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 interface Props {
   usuario: Usuario;
@@ -63,7 +64,7 @@ function CambiarPassword() {
         id="passwordNueva"
         value={passwordNueva}
         onChange={setPasswordNueva}
-        minLength={6}
+        minLength={LARGO_MINIMO_PASSWORD}
         autoComplete="new-password"
         required
       />

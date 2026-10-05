@@ -1,4 +1,4 @@
-export const LARGO_MINIMO_PASSWORD = 6;
+import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
