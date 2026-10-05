@@ -1,0 +1,87 @@
+.publicacion-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 28px;
+}
+
+.publicacion-form label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+.publicacion-form input,
+.publicacion-form textarea,
+.publicacion-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.publicacion-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.publicacion-form input:focus,
+.publicacion-form textarea:focus,
+.publicacion-form select:focus {
+  border-color: var(--accent);
+}
+
+.campo-password {
+  position: relative;
+  display: flex;
+}
+
+.campo-password .campo-password-input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 44px;
+}
+
+.campo-password input::-ms-reveal,
+.campo-password input::-ms-clear {
+  display: none;
+}
+
+.campo-password .boton-ver-password {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  margin: 0;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.campo-password .boton-ver-password:hover {
+  color: var(--ink);
+}
+
+.boton-ver-password svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-error {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  background: var(--error-soft);
+  color: var(--error);
+  border-radius: 6px;
+  font-size: 13px;
+}

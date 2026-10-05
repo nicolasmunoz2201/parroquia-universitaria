@@ -1,0 +1,13 @@
+h1,
+h2,
+.topbar-titulo,
+.sidebar-titulo {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+}
+
+.login-subtitle,
+.pagina-subtitulo {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+}

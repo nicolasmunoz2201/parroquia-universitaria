@@ -83,6 +83,14 @@ export async function activar(req: Request, res: Response) {
 }
 
 export async function eliminar(req: Request, res: Response) {
+  const encargados = await organismoService.contarEncargados(req.params.id as string);
+  if (encargados > 0) {
+    res.status(409).json({
+      message: `No se puede eliminar: el organismo tiene ${encargados} encargado(s) asignado(s). Cambiales el rol u organismo primero.`,
+    });
+    return;
+  }
+
   try {
     await organismoService.eliminarOrganismo(req.params.id as string);
     res.status(204).send();

@@ -1,0 +1,61 @@
+.boton {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boton-principal {
+  background: var(--accent);
+  color: #fff;
+}
+
+.boton-secundario {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.boton-peligro {
+  background: var(--error);
+  color: #fff;
+}
+
+.boton-peligro-borde {
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+.boton-formulario {
+  margin-top: 22px;
+  padding: 11px 16px;
+  font-size: 14.5px;
+}
+
+.boton-chico {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.boton-enlace {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

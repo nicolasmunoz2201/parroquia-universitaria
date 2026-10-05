@@ -4,10 +4,11 @@ import Dashboard from "./components/Dashboard";
 import PaginaInicial from "./components/PaginaInicial";
 import DashboardPublicaciones from "./components/DashboardPublicaciones";
 import DashboardOrganismos from "./components/DashboardOrganismos";
+import DashboardUsuarios from "./components/DashboardUsuarios";
+import RestablecerPassword from "./components/RestablecerPassword";
 import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
-import { getToken } from "./services/api";
-import { getUsuarioActual, logout, verificarToken } from "./services/auth.service";
+import { logout, obtenerSesion } from "./services/auth.service";
 import type { Usuario } from "./services/auth.service";
 import "./App.css";
 
@@ -20,16 +21,15 @@ function App() {
   const [verificando, setVerificando] = useState(true);
   const [vista, setVista] = useState<Vista>("inicio");
   const [sidebarAbierto, setSidebarAbierto] = useState(false);
+  const [codigoRecuperacion, setCodigoRecuperacion] = useState(() =>
+    new URLSearchParams(window.location.search).get("restablecer")
+  );
 
   useEffect(() => {
     async function verificarSesion() {
-      if (!getToken()) {
-        setVerificando(false);
-        return;
-      }
-
-      if (await verificarToken()) {
-        setUsuario(getUsuarioActual());
+      const usuarioActual = await obtenerSesion();
+      if (usuarioActual) {
+        setUsuario(usuarioActual);
       } else {
         logout();
       }
@@ -48,6 +48,19 @@ function App() {
     logout();
     setUsuario(null);
     setVista("inicio");
+  }
+
+  function navegar(nuevaVista: Vista) {
+    if (codigoRecuperacion) {
+      window.history.replaceState(null, "", window.location.pathname);
+      setCodigoRecuperacion(null);
+    }
+    setVista(nuevaVista);
+  }
+
+  function terminarRecuperacion() {
+    handleLogout();
+    navegar("login");
   }
 
   if (verificando) {
@@ -74,19 +87,26 @@ function App() {
         vistaActual={vista}
         abierto={sidebarAbierto}
         puedeGestionar={puedeGestionarPublicaciones(usuario)}
-        onNavegar={setVista}
+        onNavegar={navegar}
         onLogout={handleLogout}
         onCerrar={() => setSidebarAbierto(false)}
       />
 
       <main className="app-contenido">
-        {vista === "inicio" && <PaginaInicial />}
-        {vista === "login" && <Login onLogin={handleLogin} />}
-        {vista === "perfil" && usuario && <Dashboard usuario={usuario} />}
-        {vista === "gestion" && usuario && puedeGestionarPublicaciones(usuario) && (
-          <DashboardPublicaciones usuario={usuario} />
+        {codigoRecuperacion ? (
+          <RestablecerPassword codigo={codigoRecuperacion} onTerminar={terminarRecuperacion} />
+        ) : (
+          <>
+            {vista === "inicio" && <PaginaInicial />}
+            {vista === "login" && <Login onLogin={handleLogin} />}
+            {vista === "perfil" && usuario && <Dashboard usuario={usuario} />}
+            {vista === "gestion" && usuario && puedeGestionarPublicaciones(usuario) && (
+              <DashboardPublicaciones usuario={usuario} />
+            )}
+            {vista === "organismos" && usuario?.rol === "ADMINISTRADOR" && <DashboardOrganismos />}
+            {vista === "usuarios" && usuario?.rol === "ADMINISTRADOR" && <DashboardUsuarios />}
+          </>
         )}
-        {vista === "organismos" && usuario?.rol === "ADMINISTRADOR" && <DashboardOrganismos />}
       </main>
     </div>
   );

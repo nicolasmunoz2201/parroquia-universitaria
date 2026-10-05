@@ -10,10 +10,14 @@ import type { Usuario } from "../services/auth.service";
 import { usePublicaciones } from "../hooks/usePublicaciones";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
-import ConfirmarEliminacion from "./ConfirmarEliminacion";
+import ConfirmarAccion from "./ConfirmarAccion";
+import {
+  BYTES_POR_MB,
+  MAX_FOTOS_POR_PUBLICACION,
+  MAX_TAMANO_FOTO_MB,
+  TIPOS_FOTO,
+} from "../constants/archivos";
 
-const MAX_FOTOS = 3;
-const MAX_TAMANO_FOTO_MB = 5;
 
 interface ImagenSeleccionada {
   archivo: File;
@@ -44,6 +48,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [errorEliminar, setErrorEliminar] = useState("");
   const [porEliminar, setPorEliminar] = useState<Publicacion | null>(null);
+  const [confirmandoEnvio, setConfirmandoEnvio] = useState(false);
   const inputImagenRef = useRef<HTMLInputElement>(null);
 
   const publicacionesGestionables = publicaciones.filter(
@@ -67,13 +72,19 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     const nuevosArchivos = Array.from(e.target.files ?? []);
     e.target.value = "";
 
-    if (imagenes.length + nuevosArchivos.length > MAX_FOTOS) {
-      setError(`Puedes subir hasta ${MAX_FOTOS} fotos por publicacion`);
+    if (imagenes.length + nuevosArchivos.length > MAX_FOTOS_POR_PUBLICACION) {
+      setError(`Puedes subir hasta ${MAX_FOTOS_POR_PUBLICACION} fotos por publicacion`);
+      return;
+    }
+
+    const fotoNoPermitida = nuevosArchivos.find((archivo) => !TIPOS_FOTO.includes(archivo.type));
+    if (fotoNoPermitida) {
+      setError(`"${fotoNoPermitida.name}" no es una foto JPG, PNG o WEBP`);
       return;
     }
 
     const fotoPesada = nuevosArchivos.find(
-      (archivo) => archivo.size > MAX_TAMANO_FOTO_MB * 1024 * 1024
+      (archivo) => archivo.size > MAX_TAMANO_FOTO_MB * BYTES_POR_MB
     );
     if (fotoPesada) {
       setError(`"${fotoPesada.name}" pesa mas de ${MAX_TAMANO_FOTO_MB} MB`);
@@ -106,21 +117,26 @@ export default function DashboardPublicaciones({ usuario }: Props) {
     setError("");
   }
 
-  async function handleSubmit(e: FormEvent) {
+  const organismoDestino = esAdmin ? organismoId : usuario.organismoId;
+
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
 
+    if (!editando && !organismoDestino) {
+      setError("Selecciona un organismo");
+      return;
+    }
+
+    setConfirmandoEnvio(true);
+  }
+
+  async function enviarPublicacion() {
     const formData = new FormData();
     formData.append("titulo", titulo);
     formData.append("contenido", contenido);
     imagenes.forEach((imagen) => formData.append("imagenes", imagen.archivo));
-
-    if (!editando) {
-      const organismoDestino = esAdmin ? organismoId : usuario.organismoId;
-      if (!organismoDestino) {
-        setError("Selecciona un organismo");
-        return;
-      }
+    if (!editando && organismoDestino) {
       formData.append("organismoId", organismoDestino);
     }
 
@@ -203,7 +219,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
             </>
           ))}
 
-        <label htmlFor="imagen">Fotos (maximo {MAX_FOTOS})</label>
+        <label htmlFor="imagen">Fotos (maximo {MAX_FOTOS_POR_PUBLICACION})</label>
         {editando && (
           <p className="imagenes-actuales-hint">
             {editando.imagenes.length > 0
@@ -213,13 +229,34 @@ export default function DashboardPublicaciones({ usuario }: Props) {
         )}
         <input
           id="imagen"
+          className="input-archivo-oculto"
           ref={inputImagenRef}
           type="file"
-          accept="image/*"
+          accept={TIPOS_FOTO.join(",")}
           multiple
-          disabled={imagenes.length >= MAX_FOTOS}
+          disabled={imagenes.length >= MAX_FOTOS_POR_PUBLICACION}
           onChange={handleImagenesChange}
         />
+        <label
+          htmlFor="imagen"
+          className={`selector-fotos ${imagenes.length >= MAX_FOTOS_POR_PUBLICACION ? "selector-fotos-lleno" : ""}`}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+            <circle cx="9" cy="10" r="1.6" fill="currentColor" />
+            <path d="M4 17l5-5 4 4 2.5-2.5L20 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+          </svg>
+          <span className="selector-fotos-texto">
+            {imagenes.length >= MAX_FOTOS_POR_PUBLICACION
+              ? "Llegaste al máximo de fotos"
+              : imagenes.length > 0
+                ? "Agregar más fotos"
+                : "Elegir fotos"}
+          </span>
+          <span className="selector-fotos-ayuda">
+            {imagenes.length} de {MAX_FOTOS_POR_PUBLICACION} fotos · JPG, PNG o WEBP · máximo {MAX_TAMANO_FOTO_MB} MB cada una
+          </span>
+        </label>
 
         {imagenes.length > 0 && (
           <>
@@ -238,7 +275,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
                 </li>
               ))}
             </ul>
-            <button type="button" className="boton-quitar-imagen" onClick={handleQuitarImagenes}>
+            <button type="button" className="boton boton-peligro-borde boton-chico boton-quitar-imagen" onClick={handleQuitarImagenes}>
               Quitar todas las fotos
             </button>
           </>
@@ -247,11 +284,13 @@ export default function DashboardPublicaciones({ usuario }: Props) {
         {error && <p className="login-error">{error}</p>}
 
         <div className="acciones-formulario">
-          <button type="submit" disabled={enviando}>
+          <button type="submit" className="boton boton-principal boton-formulario" disabled={enviando}>
             {enviando ? "Guardando..." : editando ? "Guardar cambios" : "Publicar"}
           </button>
           {editando && (
-            <button type="button" className="boton-secundario" onClick={handleCancelarEdicion}>
+            <button type="button" className="boton boton-secundario boton-formulario"
+              onClick={handleCancelarEdicion}
+            >
               Cancelar
             </button>
           )}
@@ -267,18 +306,43 @@ export default function DashboardPublicaciones({ usuario }: Props) {
               <strong>{pub.titulo}</strong> — {pub.organismo.nombre}
             </span>
             <span className="acciones-organismo">
-              <button onClick={() => handleEditar(pub)}>Editar</button>
-              <button onClick={() => setPorEliminar(pub)}>Eliminar</button>
+              <button className="boton boton-secundario boton-chico" onClick={() => handleEditar(pub)}>
+                Editar
+              </button>
+              <button className="boton boton-peligro-borde boton-chico" onClick={() => setPorEliminar(pub)}>
+                Eliminar
+              </button>
             </span>
           </li>
         ))}
         {publicacionesGestionables.length === 0 && <li>No hay publicaciones todavia.</li>}
       </ul>
 
+      {confirmandoEnvio && (
+        <ConfirmarAccion
+          titulo={editando ? "Guardar cambios" : "Publicar"}
+          mensaje={
+            editando
+              ? `¿Guardar los cambios de "${titulo.trim()}"?`
+              : `¿Publicar "${titulo.trim()}"${
+                  imagenes.length > 0 ? ` con ${imagenes.length} foto(s)` : " sin fotos"
+                }?`
+          }
+          textoConfirmar={editando ? "Guardar" : "Publicar"}
+          onConfirmar={() => {
+            setConfirmandoEnvio(false);
+            enviarPublicacion();
+          }}
+          onCancelar={() => setConfirmandoEnvio(false)}
+        />
+      )}
+
       {porEliminar && (
-        <ConfirmarEliminacion
+        <ConfirmarAccion
           titulo="Eliminar publicacion"
           mensaje={`¿Seguro que quieres eliminar "${porEliminar.titulo}"? Esta accion no se puede deshacer.`}
+          textoConfirmar="Eliminar"
+          peligro
           onConfirmar={() => {
             setPorEliminar(null);
             handleEliminar(porEliminar.id);

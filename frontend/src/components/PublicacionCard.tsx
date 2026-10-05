@@ -34,7 +34,19 @@ export default function PublicacionCard({ publicacion }: Props) {
     <article className="publicacion-card">
       {totalImagenes > 0 && (
         <div className="publicacion-carrusel">
-          <img src={`${API_URL}${publicacion.imagenes[indice]}`} alt={publicacion.titulo} />
+          <div className="publicacion-foto">
+            <img
+              className="publicacion-foto-fondo"
+              src={`${API_URL}${publicacion.imagenes[indice]}`}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className="publicacion-foto-principal"
+              src={`${API_URL}${publicacion.imagenes[indice]}`}
+              alt={publicacion.titulo}
+            />
+          </div>
           {totalImagenes > 1 && (
             <>
               <button

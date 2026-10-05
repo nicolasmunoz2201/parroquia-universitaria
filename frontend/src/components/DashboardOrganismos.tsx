@@ -9,7 +9,7 @@ import {
 import type { Organismo } from "../services/organismo.service";
 import { useOrganismos } from "../hooks/useOrganismos";
 import { useToast } from "../context/ToastContext";
-import ConfirmarEliminacion from "./ConfirmarEliminacion";
+import ConfirmarAccion from "./ConfirmarAccion";
 
 const NOMBRE_ORGANISMO_REGEX = /^[\p{L}\p{N} .,-]+$/u;
 
@@ -105,7 +105,7 @@ export default function DashboardOrganismos() {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button type="submit" disabled={creando}>
+        <button type="submit" className="boton boton-principal boton-formulario" disabled={creando}>
           {creando ? "Creando..." : "Crear organismo"}
         </button>
       </form>
@@ -121,10 +121,15 @@ export default function DashboardOrganismos() {
                 {org.nombre} {org.activo === false && <em>(inactivo)</em>}
               </span>
               <span className="acciones-organismo">
-                <button onClick={() => handleCambiarEstado(org.id, org.activo)}>
+                <button
+                  className="boton boton-secundario boton-chico"
+                  onClick={() => handleCambiarEstado(org.id, org.activo)}
+                >
                   {org.activo === false ? "Activar" : "Desactivar"}
                 </button>
-                <button onClick={() => setPorEliminar(org)}>Eliminar</button>
+                <button className="boton boton-peligro-borde boton-chico" onClick={() => setPorEliminar(org)}>
+                  Eliminar
+                </button>
               </span>
             </li>
           ))}
@@ -132,9 +137,11 @@ export default function DashboardOrganismos() {
       </ul>
 
       {porEliminar && (
-        <ConfirmarEliminacion
+        <ConfirmarAccion
           titulo="Eliminar organismo"
           mensaje={`¿Seguro que quieres eliminar "${porEliminar.nombre}"? Esta accion no se puede deshacer.`}
+          textoConfirmar="Eliminar"
+          peligro
           onConfirmar={() => {
             setPorEliminar(null);
             handleEliminar(porEliminar.id);

@@ -30,6 +30,10 @@ export function activarOrganismo(id: string) {
   return prisma.organismo.update({ where: { id }, data: { activo: true } });
 }
 
+export function contarEncargados(id: string) {
+  return prisma.usuario.count({ where: { organismoId: id } });
+}
+
 export function eliminarOrganismo(id: string) {
   return prisma.organismo.delete({ where: { id } });
 }
