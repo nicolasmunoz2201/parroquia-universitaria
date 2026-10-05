@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { restablecerPassword } from "../services/auth.service";
 import CampoPassword from "./CampoPassword";
+import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 interface Props {
   codigo: string;
@@ -60,8 +61,9 @@ export default function RestablecerPassword({ codigo, onTerminar }: Props) {
           id="nuevaPassword"
           value={password}
           onChange={setPassword}
-          minLength={6}
+          minLength={LARGO_MINIMO_PASSWORD}
           autoComplete="new-password"
+          placeholder={`Mínimo ${LARGO_MINIMO_PASSWORD} caracteres`}
           required
         />
 
@@ -71,6 +73,7 @@ export default function RestablecerPassword({ codigo, onTerminar }: Props) {
           value={confirmarPassword}
           onChange={setConfirmarPassword}
           autoComplete="new-password"
+          placeholder="Repite tu contraseña"
           required
         />
 

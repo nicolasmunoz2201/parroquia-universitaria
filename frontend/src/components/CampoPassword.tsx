@@ -7,9 +7,18 @@ interface Props {
   minLength?: number;
   required?: boolean;
   autoComplete?: string;
+  placeholder?: string;
 }
 
-export default function CampoPassword({ id, value, onChange, minLength, required, autoComplete }: Props) {
+export default function CampoPassword({
+  id,
+  value,
+  onChange,
+  minLength,
+  required,
+  autoComplete,
+  placeholder,
+}: Props) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -23,6 +32,7 @@ export default function CampoPassword({ id, value, onChange, minLength, required
         minLength={minLength}
         required={required}
         autoComplete={autoComplete}
+        placeholder={placeholder}
       />
       <button
         type="button"

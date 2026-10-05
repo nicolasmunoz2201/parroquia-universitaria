@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { login, registrar } from "../services/auth.service";
 import type { Usuario } from "../services/auth.service";
 import CampoPassword from "./CampoPassword";
+import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
 interface Props {
   onLogin: (usuario: Usuario) => void;
@@ -60,6 +61,8 @@ export default function Login({ onLogin }: Props) {
               id="nombre"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
+              placeholder="Ej: María González"
+              autoComplete="name"
               required
             />
           </>
@@ -71,6 +74,8 @@ export default function Login({ onLogin }: Props) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="nombre@correo.cl"
+          autoComplete="email"
           required
         />
 
@@ -79,8 +84,11 @@ export default function Login({ onLogin }: Props) {
           id="password"
           value={password}
           onChange={setPassword}
-          minLength={esRegistro ? 6 : undefined}
+          minLength={esRegistro ? LARGO_MINIMO_PASSWORD : undefined}
           autoComplete={esRegistro ? "new-password" : "current-password"}
+          placeholder={
+            esRegistro ? `Mínimo ${LARGO_MINIMO_PASSWORD} caracteres` : "Ingresa tu contraseña"
+          }
           required
         />
 
@@ -92,6 +100,7 @@ export default function Login({ onLogin }: Props) {
               value={confirmarPassword}
               onChange={setConfirmarPassword}
               autoComplete="new-password"
+              placeholder="Repite tu contraseña"
               required
             />
           </>
