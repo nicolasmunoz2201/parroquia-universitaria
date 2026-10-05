@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import * as publicacionService from "../services/publicacion.service";
+import * as organismoService from "../services/organismo.service";
 import { eliminarArchivos } from "../middlewares/upload.middleware";
 
 export async function listar(req: Request, res: Response) {
@@ -13,7 +14,7 @@ export async function listar(req: Request, res: Response) {
 export async function crear(req: Request, res: Response) {
   const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
   const { titulo, contenido, organismoId } = req.body;
-  if (!titulo || !contenido || !organismoId) {
+  if (!titulo || !contenido || typeof organismoId !== "string" || !organismoId) {
     eliminarArchivos(archivos);
     res.status(400).json({ message: "titulo, contenido y organismoId son requeridos" });
     return;
@@ -22,6 +23,18 @@ export async function crear(req: Request, res: Response) {
   if (req.usuario!.rol === "ENCARGADO_ORGANISMO" && req.usuario!.organismoId !== organismoId) {
     eliminarArchivos(archivos);
     res.status(403).json({ message: "Solo puedes publicar para tu propio organismo" });
+    return;
+  }
+
+  const organismo = await organismoService.obtenerOrganismo(organismoId);
+  if (!organismo) {
+    eliminarArchivos(archivos);
+    res.status(400).json({ message: "El organismo seleccionado no existe" });
+    return;
+  }
+  if (!organismo.activo) {
+    eliminarArchivos(archivos);
+    res.status(400).json({ message: "No se puede publicar en un organismo desactivado" });
     return;
   }
 
