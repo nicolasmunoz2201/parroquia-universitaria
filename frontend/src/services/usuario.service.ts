@@ -46,6 +46,13 @@ export function cambiarPasswordUsuario(id: string, password: string): Promise<vo
   });
 }
 
+export function enviarCorreoRecuperacion(id: string): Promise<void> {
+  return peticion(`/api/usuarios/${id}/recuperacion`, "No se pudo enviar el correo de recuperación", {
+    method: "POST",
+    auth: true,
+  });
+}
+
 export function actualizarRolUsuario(
   id: string,
   datos: { rol: Rol; organismoId?: string }

@@ -4,6 +4,7 @@ import {
   crearUsuario,
   actualizarRolUsuario,
   cambiarPasswordUsuario,
+  enviarCorreoRecuperacion,
   ETIQUETAS_ROL,
 } from "../services/usuario.service";
 import type { UsuarioAdmin, Rol } from "../services/usuario.service";
@@ -39,6 +40,7 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  const [confirmandoCorreo, setConfirmandoCorreo] = useState(false);
 
   const cambioRol =
     rol !== usuario.rol ||
@@ -94,6 +96,47 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
     } finally {
       setGuardando(false);
     }
+  }
+
+  async function enviarCorreo() {
+    setGuardando(true);
+    try {
+      await enviarCorreoRecuperacion(usuario.id);
+      mostrarToast(`Correo de recuperación enviado a ${usuario.email}`);
+      onCerrar();
+    } catch (err) {
+      setConfirmandoCorreo(false);
+      setError(err instanceof Error ? err.message : "No se pudo enviar el correo de recuperación");
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  if (confirmandoCorreo) {
+    return (
+      <dialog
+        ref={dialogoRef}
+        className="dialogo-confirmacion"
+        onCancel={(e) => {
+          e.preventDefault();
+          setConfirmandoCorreo(false);
+        }}
+      >
+        <h2>Enviar correo de recuperación</h2>
+        <p>
+          ¿Enviar un correo a "{usuario.email}"? Recibirá un enlace para crear una nueva contraseña,
+          que sirve una sola vez y vence en 1 hora.
+        </p>
+        <div className="dialogo-acciones">
+          <button type="button" className="dialogo-cancelar" onClick={() => setConfirmandoCorreo(false)}>
+            Volver
+          </button>
+          <button type="button" className="dialogo-confirmar" onClick={enviarCorreo} disabled={guardando}>
+            {guardando ? "Enviando..." : "Enviar correo"}
+          </button>
+        </div>
+      </dialog>
+    );
   }
 
   if (confirmando) {
@@ -168,6 +211,16 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
           autoComplete="new-password"
         />
         <p className="dialogo-ayuda">Déjala vacía si no quieres cambiarla.</p>
+        <button
+          type="button"
+          className="boton-enlace"
+          onClick={() => {
+            setError("");
+            setConfirmandoCorreo(true);
+          }}
+        >
+          Enviar correo de recuperación
+        </button>
 
         {password && (
           <>

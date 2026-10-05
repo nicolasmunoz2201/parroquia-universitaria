@@ -46,6 +46,13 @@ export async function cambiarMiPassword(passwordActual: string, passwordNueva: s
   return guardarSesion(data);
 }
 
+export function restablecerPassword(codigo: string, password: string): Promise<void> {
+  return peticion("/api/auth/restablecer", "No se pudo cambiar la contraseña", {
+    method: "POST",
+    json: { codigo, password },
+  });
+}
+
 export function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");
