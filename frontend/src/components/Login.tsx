@@ -99,7 +99,7 @@ export default function Login({ onLogin }: Props) {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button type="submit" disabled={cargando}>
+        <button type="submit" className="boton boton-principal boton-formulario" disabled={cargando}>
           {cargando
             ? esRegistro
               ? "Creando cuenta..."
@@ -111,7 +111,7 @@ export default function Login({ onLogin }: Props) {
 
         <p className="login-cambio">
           {esRegistro ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?"}{" "}
-          <button type="button" className="login-link" onClick={cambiarModo}>
+          <button type="button" className="boton-enlace" onClick={cambiarModo}>
             {esRegistro ? "Inicia sesión" : "Regístrate"}
           </button>
         </p>

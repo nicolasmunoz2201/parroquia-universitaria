@@ -1,0 +1,73 @@
+.dialogo-confirmacion {
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.35);
+}
+
+.dialogo-confirmacion::backdrop {
+  background: rgba(20, 22, 30, 0.45);
+}
+
+.dialogo-confirmacion h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.dialogo-confirmacion > p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.dialogo-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.dialogo-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.dialogo-form label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+
+.dialogo-form input,
+.dialogo-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+}
+
+.dialogo-form input:focus,
+.dialogo-form select:focus {
+  border-color: var(--accent);
+}
+
+.dialogo-ayuda {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.dialogo-form .boton-enlace {
+  align-self: flex-start;
+  margin-top: 10px;
+  font-size: 13.5px;
+}

@@ -128,10 +128,10 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
           que sirve una sola vez y vence en 1 hora.
         </p>
         <div className="dialogo-acciones">
-          <button type="button" className="dialogo-cancelar" onClick={() => setConfirmandoCorreo(false)}>
+          <button type="button" className="boton boton-secundario" onClick={() => setConfirmandoCorreo(false)}>
             Volver
           </button>
-          <button type="button" className="dialogo-confirmar" onClick={enviarCorreo} disabled={guardando}>
+          <button type="button" className="boton boton-principal" onClick={enviarCorreo} disabled={guardando}>
             {guardando ? "Enviando..." : "Enviar correo"}
           </button>
         </div>
@@ -156,10 +156,10 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
           nueva contraseña para iniciar sesión.
         </p>
         <div className="dialogo-acciones">
-          <button type="button" className="dialogo-cancelar" onClick={() => setConfirmando(false)}>
+          <button type="button" className="boton boton-secundario" onClick={() => setConfirmando(false)}>
             Volver
           </button>
-          <button type="button" className="dialogo-confirmar" onClick={guardar} disabled={guardando}>
+          <button type="button" className="boton boton-principal" onClick={guardar} disabled={guardando}>
             {guardando ? "Guardando..." : "Cambiar contraseña"}
           </button>
         </div>
@@ -238,10 +238,10 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
         {error && <p className="login-error">{error}</p>}
 
         <div className="dialogo-acciones">
-          <button type="button" className="dialogo-cancelar" onClick={onCerrar}>
+          <button type="button" className="boton boton-secundario" onClick={onCerrar}>
             Cancelar
           </button>
-          <button type="submit" className="dialogo-confirmar" disabled={guardando}>
+          <button type="submit" className="boton boton-principal" disabled={guardando}>
             {guardando ? "Guardando..." : "Guardar"}
           </button>
         </div>
@@ -368,7 +368,7 @@ export default function DashboardUsuarios() {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button type="submit" disabled={creando}>
+        <button type="submit" className="boton boton-principal boton-formulario" disabled={creando}>
           {creando ? "Creando..." : "Crear usuario"}
         </button>
       </form>
@@ -408,7 +408,7 @@ export default function DashboardUsuarios() {
                   {u.organismo && <span className="fila-usuario-organismo">{u.organismo.nombre}</span>}
                 </div>
                 {!esAdministrador && (
-                  <button type="button" className="boton-editar">
+                  <button type="button" className="boton boton-secundario boton-chico">
                     Editar
                   </button>
                 )}

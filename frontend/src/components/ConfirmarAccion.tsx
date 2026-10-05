@@ -30,12 +30,12 @@ export default function ConfirmarAccion({
       <h2>{titulo}</h2>
       <p>{mensaje}</p>
       <div className="dialogo-acciones">
-        <button type="button" className="dialogo-cancelar" onClick={onCancelar}>
+        <button type="button" className="boton boton-secundario" onClick={onCancelar}>
           Cancelar
         </button>
         <button
           type="button"
-          className={peligro ? "dialogo-eliminar" : "dialogo-confirmar"}
+          className={peligro ? "boton boton-peligro" : "boton boton-principal"}
           onClick={onConfirmar}
         >
           {textoConfirmar}

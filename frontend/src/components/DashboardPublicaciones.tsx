@@ -272,7 +272,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
                 </li>
               ))}
             </ul>
-            <button type="button" className="boton-quitar-imagen" onClick={handleQuitarImagenes}>
+            <button type="button" className="boton boton-peligro-borde boton-chico boton-quitar-imagen" onClick={handleQuitarImagenes}>
               Quitar todas las fotos
             </button>
           </>
@@ -281,11 +281,13 @@ export default function DashboardPublicaciones({ usuario }: Props) {
         {error && <p className="login-error">{error}</p>}
 
         <div className="acciones-formulario">
-          <button type="submit" disabled={enviando}>
+          <button type="submit" className="boton boton-principal boton-formulario" disabled={enviando}>
             {enviando ? "Guardando..." : editando ? "Guardar cambios" : "Publicar"}
           </button>
           {editando && (
-            <button type="button" className="boton-secundario" onClick={handleCancelarEdicion}>
+            <button type="button" className="boton boton-secundario boton-formulario"
+              onClick={handleCancelarEdicion}
+            >
               Cancelar
             </button>
           )}
@@ -301,8 +303,12 @@ export default function DashboardPublicaciones({ usuario }: Props) {
               <strong>{pub.titulo}</strong> — {pub.organismo.nombre}
             </span>
             <span className="acciones-organismo">
-              <button onClick={() => handleEditar(pub)}>Editar</button>
-              <button onClick={() => setPorEliminar(pub)}>Eliminar</button>
+              <button className="boton boton-secundario boton-chico" onClick={() => handleEditar(pub)}>
+                Editar
+              </button>
+              <button className="boton boton-peligro-borde boton-chico" onClick={() => setPorEliminar(pub)}>
+                Eliminar
+              </button>
             </span>
           </li>
         ))}

@@ -41,7 +41,7 @@ export default function RestablecerPassword({ codigo, onTerminar }: Props) {
         <div className="login-card">
           <h1>Contraseña actualizada</h1>
           <p className="login-subtitle">Ya puedes iniciar sesión con tu nueva contraseña.</p>
-          <button type="button" onClick={onTerminar}>
+          <button type="button" className="boton boton-principal boton-formulario" onClick={onTerminar}>
             Ir a iniciar sesión
           </button>
         </div>
@@ -76,7 +76,7 @@ export default function RestablecerPassword({ codigo, onTerminar }: Props) {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button type="submit" disabled={guardando}>
+        <button type="submit" className="boton boton-principal boton-formulario" disabled={guardando}>
           {guardando ? "Guardando..." : "Guardar contraseña"}
         </button>
       </form>

@@ -79,7 +79,7 @@ function CambiarPassword() {
 
       {error && <p className="login-error">{error}</p>}
 
-      <button type="submit" disabled={guardando}>
+      <button type="submit" className="boton boton-principal boton-formulario" disabled={guardando}>
         {guardando ? "Guardando..." : "Cambiar contraseña"}
       </button>
     </form>
