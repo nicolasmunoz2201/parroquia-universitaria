@@ -37,6 +37,15 @@ export async function registrar(nombre: string, email: string, password: string)
   return guardarSesion(data);
 }
 
+export async function cambiarMiPassword(passwordActual: string, passwordNueva: string): Promise<Usuario> {
+  const data = await peticion<LoginResponse>("/api/auth/password", "No se pudo cambiar la contraseña", {
+    method: "PATCH",
+    auth: true,
+    json: { passwordActual, passwordNueva },
+  });
+  return guardarSesion(data);
+}
+
 export function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");

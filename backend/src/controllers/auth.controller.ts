@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Prisma } from "../generated/prisma/client";
 import * as authService from "../services/auth.service";
-import { leerEmail, leerTexto, validarDatosCuenta } from "../utils/validaciones";
+import { leerEmail, leerTexto, validarDatosCuenta, validarPassword } from "../utils/validaciones";
 
 export async function login(req: Request, res: Response) {
   const email = leerEmail(req.body?.email);
@@ -41,6 +41,37 @@ export async function registro(req: Request, res: Response) {
     }
     throw error;
   }
+}
+
+export async function cambiarPassword(req: Request, res: Response) {
+  const passwordActual = req.body?.passwordActual;
+  const passwordNueva = req.body?.passwordNueva;
+
+  if (typeof passwordActual !== "string" || !passwordActual) {
+    res.status(400).json({ message: "Ingresa tu contraseña actual" });
+    return;
+  }
+  const error = validarPassword(passwordNueva);
+  if (error) {
+    res.status(400).json({ message: error });
+    return;
+  }
+  if (passwordNueva === passwordActual) {
+    res.status(400).json({ message: "La nueva contraseña debe ser distinta a la actual" });
+    return;
+  }
+
+  const resultado = await authService.cambiarPasswordPropia(
+    req.usuario!.id,
+    passwordActual,
+    passwordNueva
+  );
+  if (!resultado) {
+    res.status(400).json({ message: "La contraseña actual no es correcta" });
+    return;
+  }
+
+  res.json(resultado);
 }
 
 export async function me(req: Request, res: Response) {

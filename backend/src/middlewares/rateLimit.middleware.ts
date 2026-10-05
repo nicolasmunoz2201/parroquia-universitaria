@@ -13,6 +13,16 @@ export const limiteLogin = rateLimit({
   message: { message: "Demasiados intentos de inicio de sesion. Espera 15 minutos e intenta de nuevo." },
 });
 
+// Va despues de requiereAutenticacion, asi cuenta los intentos por usuario.
+export const limiteCambioPassword = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  keyGenerator: (req) => req.usuario?.id ?? ipKeyGenerator(req.ip ?? ""),
+  message: { message: "Demasiados intentos de cambiar la contraseña. Espera 15 minutos e intenta de nuevo." },
+});
+
 export const limiteRegistro = rateLimit({
   windowMs: UNA_HORA,
   limit: 30,

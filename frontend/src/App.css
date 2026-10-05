@@ -389,6 +389,10 @@ h2,
   font-size: 14.5px;
 }
 
+.perfil-password {
+  margin-top: 24px;
+}
+
 /* ---------- Pagina inicial ---------- */
 .pagina-inicial {
   max-width: 960px;

@@ -47,8 +47,10 @@ export function actualizarRolUsuario(id: string, data: { rol: Rol; organismoId: 
 
 export async function cambiarPassword(id: string, password: string) {
   const passwordHasheada = await bcrypt.hash(password, 10);
-  await prisma.usuario.update({
+  const { tokenVersion } = await prisma.usuario.update({
     where: { id },
     data: { password: passwordHasheada, tokenVersion: { increment: 1 } },
+    select: { tokenVersion: true },
   });
+  return tokenVersion;
 }
