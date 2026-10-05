@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as publicacionController from "../controllers/publicacion.controller";
 import { requiereAutenticacion, requiereRol } from "../middlewares/auth.middleware";
-import { uploadImagen } from "../middlewares/upload.middleware";
+import { uploadImagen, verificarImagenes } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -11,11 +11,18 @@ const puedeGestionar = [
 ];
 
 router.get("/", publicacionController.listar);
-router.post("/", ...puedeGestionar, uploadImagen.array("imagenes", 3), publicacionController.crear);
+router.post(
+  "/",
+  ...puedeGestionar,
+  uploadImagen.array("imagenes", 3),
+  verificarImagenes,
+  publicacionController.crear
+);
 router.put(
   "/:id",
   ...puedeGestionar,
   uploadImagen.array("imagenes", 3),
+  verificarImagenes,
   publicacionController.actualizar
 );
 router.delete("/:id", ...puedeGestionar, publicacionController.eliminar);

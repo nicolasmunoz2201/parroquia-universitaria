@@ -14,6 +14,7 @@ import ConfirmarAccion from "./ConfirmarAccion";
 
 const MAX_FOTOS = 3;
 const MAX_TAMANO_FOTO_MB = 5;
+const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
 
 interface ImagenSeleccionada {
   archivo: File;
@@ -70,6 +71,12 @@ export default function DashboardPublicaciones({ usuario }: Props) {
 
     if (imagenes.length + nuevosArchivos.length > MAX_FOTOS) {
       setError(`Puedes subir hasta ${MAX_FOTOS} fotos por publicacion`);
+      return;
+    }
+
+    const fotoNoPermitida = nuevosArchivos.find((archivo) => !TIPOS_FOTO.includes(archivo.type));
+    if (fotoNoPermitida) {
+      setError(`"${fotoNoPermitida.name}" no es una foto JPG, PNG o WEBP`);
       return;
     }
 
@@ -222,7 +229,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
           className="input-archivo-oculto"
           ref={inputImagenRef}
           type="file"
-          accept="image/*"
+          accept={TIPOS_FOTO.join(",")}
           multiple
           disabled={imagenes.length >= MAX_FOTOS}
           onChange={handleImagenesChange}
@@ -244,7 +251,7 @@ export default function DashboardPublicaciones({ usuario }: Props) {
                 : "Elegir fotos"}
           </span>
           <span className="selector-fotos-ayuda">
-            {imagenes.length} de {MAX_FOTOS} fotos · máximo {MAX_TAMANO_FOTO_MB} MB cada una
+            {imagenes.length} de {MAX_FOTOS} fotos · JPG, PNG o WEBP · máximo {MAX_TAMANO_FOTO_MB} MB cada una
           </span>
         </label>
 

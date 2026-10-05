@@ -2,13 +2,7 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import * as publicacionService from "../services/publicacion.service";
-
-function eliminarArchivos(archivos: Express.Multer.File[]) {
-  for (const archivo of archivos) {
-    fs.unlink(archivo.path, () => {});
-  }
-}
-
+import { eliminarArchivos } from "../middlewares/upload.middleware";
 
 export async function listar(req: Request, res: Response) {
   const soloOrganismosActivos = req.query.activos === "true";
