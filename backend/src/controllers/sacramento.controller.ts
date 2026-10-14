@@ -176,6 +176,10 @@ export async function cambiarEstadoSolicitud(req: Request, res: Response) {
     res.status(409).json({ message: "La solicitud no puede pasar a ese estado" });
     return;
   }
+  if (estado === EstadoSolicitud.REALIZADA && solicitud.horario.inicio > new Date()) {
+    res.status(409).json({ message: "Solo se puede marcar como realizada desde la fecha del sacramento" });
+    return;
+  }
   if (ESTADOS_CON_OBSERVACION.includes(estado) && !observacion) {
     res.status(400).json({ message: "Escribe el motivo para el feligrés" });
     return;
@@ -202,6 +206,10 @@ export async function cancelarSolicitud(req: Request, res: Response) {
   }
   if (!ESTADOS_CANCELABLES.includes(solicitud.estado)) {
     res.status(409).json({ message: "Esta solicitud ya no se puede cancelar" });
+    return;
+  }
+  if (solicitud.horario.inicio <= new Date()) {
+    res.status(409).json({ message: "La fecha del sacramento ya paso, no se puede cancelar" });
     return;
   }
 

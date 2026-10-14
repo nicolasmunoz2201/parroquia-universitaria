@@ -68,7 +68,7 @@ const DETALLE_ESTADO: Record<EstadoSolicitud, (observacion: string) => string> =
   PENDIENTE: () => "Recibimos tu solicitud. La secretaría la revisará y te avisaremos por este medio.",
   APROBADA: () => "Tu solicitud fue aprobada. Te esperamos en la fecha y el lugar indicados.",
   OBSERVADA: (observacion) =>
-    `Tu solicitud tiene una observación: ${observacion}. Revisa "Mis sacramentos" en la plataforma.`,
+    `Tu solicitud tiene una observación: ${observacion}. Revisa "Agendar sacramentos" en la plataforma.`,
   RECHAZADA: (observacion) => `Tu solicitud fue rechazada. Motivo: ${observacion}.`,
   CANCELADA: () => "Tu solicitud fue cancelada.",
   REALIZADA: () => "El sacramento quedó registrado como realizado. ¡Gracias por acompañarnos!",

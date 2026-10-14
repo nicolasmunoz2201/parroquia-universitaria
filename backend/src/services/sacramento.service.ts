@@ -1,6 +1,9 @@
 import prisma from "../config/prisma";
 import { EstadoSolicitud, Prisma, TipoSacramento } from "../generated/prisma/client";
-import { ESTADOS_QUE_OCUPAN_CUPO } from "../constants/sacramentos";
+import {
+  ESTADOS_QUE_OCUPAN_CUPO,
+  MAX_SOLICITUDES_POR_PERSONA_POR_HORARIO,
+} from "../constants/sacramentos";
 
 export class SolicitudInvalidaError extends Error {}
 
@@ -84,6 +87,17 @@ export function crearSolicitud(data: {
       });
       if (ocupados >= horario.cupos) {
         throw new SolicitudInvalidaError("El horario ya no tiene cupos disponibles");
+      }
+
+      const propias = await tx.solicitudSacramento.count({
+        where: {
+          horarioId: horario.id,
+          solicitanteId: data.solicitanteId,
+          estado: { in: ESTADOS_QUE_OCUPAN_CUPO },
+        },
+      });
+      if (propias >= MAX_SOLICITUDES_POR_PERSONA_POR_HORARIO) {
+        throw new SolicitudInvalidaError("Ya tienes una solicitud en este horario");
       }
 
       return tx.solicitudSacramento.create({ data, include: INCLUIR_SOLICITUD });

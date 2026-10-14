@@ -46,5 +46,6 @@ export const ESTADOS_CON_OBSERVACION: EstadoSolicitud[] = [
 ];
 
 export const MAX_CUPOS_POR_HORARIO = 50;
+export const MAX_SOLICITUDES_POR_PERSONA_POR_HORARIO = 1;
 export const LARGO_MAXIMO_TEXTO = 500;
 export const ZONA_HORARIA = "America/Santiago";
