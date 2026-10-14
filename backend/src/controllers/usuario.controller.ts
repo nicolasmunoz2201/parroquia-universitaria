@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Prisma, Rol } from "../generated/prisma/client";
 import * as usuarioService from "../services/usuario.service";
 import * as organismoService from "../services/organismo.service";
-import { leerEmail, leerTexto, validarDatosCuenta, validarPassword } from "../utils/validaciones";
+import { leerEmail, leerTexto, validarDatosCuenta } from "../utils/validaciones";
 import { correoConfigurado, enviarCorreoRecuperacion } from "../utils/correo";
 
 const ROLES_ASIGNABLES: Rol[] = Object.values(Rol).filter((rol) => rol !== Rol.ADMINISTRADOR);
@@ -91,21 +91,6 @@ export async function actualizarRol(req: Request, res: Response) {
     organismoId: rol === Rol.ENCARGADO_ORGANISMO ? organismoId : null,
   });
   res.json(usuario);
-}
-
-export async function cambiarPassword(req: Request, res: Response) {
-  const password = req.body?.password;
-  const error = validarPassword(password);
-  if (error) {
-    res.status(400).json({ message: error });
-    return;
-  }
-
-  const existente = await obtenerUsuarioEditable(req, res);
-  if (!existente) return;
-
-  await usuarioService.cambiarPassword(existente.id, password);
-  res.status(204).send();
 }
 
 export async function enviarRecuperacion(req: Request, res: Response) {

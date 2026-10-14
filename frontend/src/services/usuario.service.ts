@@ -38,14 +38,6 @@ export function crearUsuario(datos: {
   });
 }
 
-export function cambiarPasswordUsuario(id: string, password: string): Promise<void> {
-  return peticion(`/api/usuarios/${id}/password`, "No se pudo cambiar la contraseña", {
-    method: "PATCH",
-    auth: true,
-    json: { password },
-  });
-}
-
 export function enviarCorreoRecuperacion(id: string): Promise<void> {
   return peticion(`/api/usuarios/${id}/recuperacion`, "No se pudo enviar el correo de recuperación", {
     method: "POST",

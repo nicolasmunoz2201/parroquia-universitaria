@@ -9,7 +9,6 @@ const soloAdmin = [requiereAutenticacion, requiereRol("ADMINISTRADOR")];
 router.get("/", ...soloAdmin, usuarioController.listar);
 router.post("/", ...soloAdmin, usuarioController.crear);
 router.patch("/:id/rol", ...soloAdmin, usuarioController.actualizarRol);
-router.patch("/:id/password", ...soloAdmin, usuarioController.cambiarPassword);
 router.post("/:id/recuperacion", ...soloAdmin, usuarioController.enviarRecuperacion);
 
 export default router;

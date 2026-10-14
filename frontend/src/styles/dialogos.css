@@ -66,6 +66,10 @@
   color: var(--ink-soft);
 }
 
+.dialogo-ayuda-separada {
+  margin-top: 16px;
+}
+
 .dialogo-form .boton-enlace {
   align-self: flex-start;
   margin-top: 10px;
