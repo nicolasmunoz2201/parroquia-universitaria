@@ -6,6 +6,9 @@ import DashboardPublicaciones from "./components/DashboardPublicaciones";
 import DashboardOrganismos from "./components/DashboardOrganismos";
 import DashboardUsuarios from "./components/DashboardUsuarios";
 import RestablecerPassword from "./components/RestablecerPassword";
+import MisSacramentos from "./components/MisSacramentos";
+import DashboardAgendamientos from "./components/DashboardAgendamientos";
+import { ROLES_GESTION_SACRAMENTOS } from "./constants/sacramentos";
 import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
 import { logout, obtenerSesion } from "./services/auth.service";
@@ -107,6 +110,10 @@ function App() {
             )}
             {vista === "organismos" && usuario?.rol === "ADMINISTRADOR" && <DashboardOrganismos />}
             {vista === "usuarios" && usuario?.rol === "ADMINISTRADOR" && <DashboardUsuarios />}
+            {vista === "sacramentos" && usuario && <MisSacramentos />}
+            {vista === "agendamientos" && usuario && ROLES_GESTION_SACRAMENTOS.includes(usuario.rol) && (
+              <DashboardAgendamientos />
+            )}
           </>
         )}
       </main>

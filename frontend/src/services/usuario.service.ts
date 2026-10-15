@@ -1,13 +1,19 @@
 import { peticion } from "./api";
 import type { Organismo } from "./organismo.service";
 
-export type Rol = "ADMINISTRADOR" | "ENCARGADO_ORGANISMO" | "ENCARGADO_COMEDOR" | "FELIGRES";
+export type Rol =
+  | "ADMINISTRADOR"
+  | "ENCARGADO_ORGANISMO"
+  | "ENCARGADO_COMEDOR"
+  | "FELIGRES"
+  | "SECRETARIA";
 
 export const ETIQUETAS_ROL: Record<Rol, string> = {
   ADMINISTRADOR: "Administrador",
   ENCARGADO_ORGANISMO: "Encargado de organismo",
   ENCARGADO_COMEDOR: "Encargado de comedor",
   FELIGRES: "Feligrés",
+  SECRETARIA: "Secretaría",
 };
 
 export interface UsuarioAdmin {

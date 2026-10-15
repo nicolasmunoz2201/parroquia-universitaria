@@ -14,7 +14,7 @@ import { useToast } from "../context/ToastContext";
 import CampoPassword from "./CampoPassword";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
-const ROLES_ASIGNABLES: Rol[] = ["FELIGRES", "ENCARGADO_ORGANISMO", "ENCARGADO_COMEDOR"];
+const ROLES_ASIGNABLES: Rol[] = ["FELIGRES", "ENCARGADO_ORGANISMO", "ENCARGADO_COMEDOR", "SECRETARIA"];
 
 function normalizar(texto: string) {
   return texto

@@ -1,0 +1,266 @@
+.campos-fecha-hora {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.campo-fecha-hora {
+  display: flex;
+  flex-direction: column;
+}
+
+.campo-fecha-hora input,
+.campo-fecha-hora select {
+  width: 100%;
+  min-height: 42px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.campo-hora-exacta {
+  max-width: calc(50% - 6px);
+  margin-left: auto;
+}
+
+@media (max-width: 480px) {
+  .campo-hora-exacta {
+    max-width: none;
+  }
+}
+
+.vista-previa-horario {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.vista-previa-horario::first-letter {
+  text-transform: uppercase;
+}
+
+.vista-previa-error {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+@media (max-width: 480px) {
+  .campos-fecha-hora {
+    grid-template-columns: 1fr;
+  }
+}
+
+.titulo-seccion {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+
+.grupo-horarios {
+  margin: 14px 0 0;
+  padding: 0;
+  border: none;
+}
+
+.grupo-horarios legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lista-horarios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publicacion-form .opcion-horario {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  row-gap: 2px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.publicacion-form .opcion-horario:hover {
+  border-color: var(--accent);
+}
+
+.publicacion-form .opcion-horario-elegida {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.opcion-horario input {
+  grid-row: span 2;
+  align-self: center;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.opcion-horario-fecha {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.opcion-horario-detalle {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.publicaciones-lista .fila-solicitud {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.fila-solicitud-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.fila-solicitud-info span {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.fila-solicitud-info span:first-of-type {
+  text-transform: capitalize;
+}
+
+.fila-solicitud-info .fila-solicitud-observacion {
+  color: #8a5c07;
+}
+
+.fila-solicitud-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.estado-solicitud {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: var(--acento-secundario-soft);
+  color: #8a5c07;
+}
+
+.estado-observada {
+  background: #fde8d4;
+  color: #9a4a00;
+}
+
+.estado-aprobada {
+  background: #e3f0e5;
+  color: #2f6b3a;
+}
+
+.estado-realizada {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.estado-rechazada {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.estado-cancelada {
+  background: var(--border);
+  color: var(--ink-soft);
+}
+
+.filtro-solicitudes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filtro-solicitudes select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.pestanas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pestana {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pestana:hover {
+  border-color: var(--accent);
+}
+
+.pestana-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pestana-detalle {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.pestana-activa {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pestana-activa .pestana-detalle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 480px) {
+  .pestanas {
+    grid-template-columns: 1fr;
+  }
+}
