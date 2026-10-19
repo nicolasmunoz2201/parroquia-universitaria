@@ -1,13 +1,19 @@
 import { peticion } from "./api";
 import type { Organismo } from "./organismo.service";
 
-export type Rol = "ADMINISTRADOR" | "ENCARGADO_ORGANISMO" | "ENCARGADO_COMEDOR" | "FELIGRES";
+export type Rol =
+  | "ADMINISTRADOR"
+  | "ENCARGADO_ORGANISMO"
+  | "ENCARGADO_COMEDOR"
+  | "FELIGRES"
+  | "SECRETARIA";
 
 export const ETIQUETAS_ROL: Record<Rol, string> = {
   ADMINISTRADOR: "Administrador",
   ENCARGADO_ORGANISMO: "Encargado de organismo",
   ENCARGADO_COMEDOR: "Encargado de comedor",
   FELIGRES: "Feligrés",
+  SECRETARIA: "Secretaría",
 };
 
 export interface UsuarioAdmin {
@@ -35,14 +41,6 @@ export function crearUsuario(datos: {
     method: "POST",
     auth: true,
     json: datos,
-  });
-}
-
-export function cambiarPasswordUsuario(id: string, password: string): Promise<void> {
-  return peticion(`/api/usuarios/${id}/password`, "No se pudo cambiar la contraseña", {
-    method: "PATCH",
-    auth: true,
-    json: { password },
   });
 }
 

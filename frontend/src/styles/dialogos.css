@@ -43,8 +43,14 @@
   margin: 14px 0 6px;
 }
 
+.dialogo-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
 .dialogo-form input,
-.dialogo-form select {
+.dialogo-form select,
+.dialogo-form textarea {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -56,7 +62,8 @@
 }
 
 .dialogo-form input:focus,
-.dialogo-form select:focus {
+.dialogo-form select:focus,
+.dialogo-form textarea:focus {
   border-color: var(--accent);
 }
 
@@ -64,6 +71,10 @@
   margin: 4px 0 0;
   font-size: 12.5px;
   color: var(--ink-soft);
+}
+
+.dialogo-ayuda-separada {
+  margin-top: 16px;
 }
 
 .dialogo-form .boton-enlace {

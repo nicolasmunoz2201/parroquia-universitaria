@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -17,6 +12,24 @@ enum Rol {
   ENCARGADO_ORGANISMO
   ENCARGADO_COMEDOR
   FELIGRES
+  SECRETARIA
+}
+
+enum TipoSacramento {
+  BAUTISMO
+  PRIMERA_COMUNION
+  CONFIRMACION
+  MATRIMONIO
+  UNCION_ENFERMOS
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  OBSERVADA
+  APROBADA
+  RECHAZADA
+  CANCELADA
+  REALIZADA
 }
 
 model Usuario {
@@ -33,6 +46,7 @@ model Usuario {
   createdAt     DateTime        @default(now())
   publicaciones Publicacion[]
   hitos         HitoHistorico[]
+  solicitudesSacramento SolicitudSacramento[]
 }
 
 model Organismo {
@@ -84,4 +98,44 @@ model Testimonio {
   hito        HitoHistorico @relation(fields: [hitoId], references: [id])
   hitoId      String
   createdAt   DateTime      @default(now())
+}
+
+model HorarioSacramento {
+  id          String                @id @default(cuid())
+  tipo        TipoSacramento
+  inicio      DateTime
+  cupos       Int                   @default(1)
+  lugar       String?
+  activo      Boolean               @default(true)
+  solicitudes SolicitudSacramento[]
+  createdAt   DateTime              @default(now())
+
+  @@index([tipo, inicio])
+}
+
+model SolicitudSacramento {
+  id                 String               @id @default(cuid())
+  estado             EstadoSolicitud      @default(PENDIENTE)
+  nombreBeneficiario String
+  comentario         String?
+  observacion        String?
+  solicitante        Usuario              @relation(fields: [solicitanteId], references: [id])
+  solicitanteId      String
+  horario            HorarioSacramento    @relation(fields: [horarioId], references: [id])
+  horarioId          String
+  documentos         DocumentoSolicitud[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([estado])
+}
+
+model DocumentoSolicitud {
+  id             String              @id @default(cuid())
+  tipoDocumento  String
+  archivo        String
+  nombreOriginal String
+  solicitud      SolicitudSacramento @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  solicitudId    String
+  createdAt      DateTime            @default(now())
 }

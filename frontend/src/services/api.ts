@@ -34,3 +34,16 @@ export async function peticion<T>(
   if (res.status === 204) return undefined as T;
   return res.json();
 }
+
+export async function peticionArchivo(ruta: string, mensajeError: string): Promise<Blob> {
+  const res = await fetch(`${API_URL}${ruta}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message ?? mensajeError);
+  }
+
+  return res.blob();
+}

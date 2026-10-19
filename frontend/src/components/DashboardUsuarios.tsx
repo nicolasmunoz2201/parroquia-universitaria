@@ -3,7 +3,6 @@ import type { FormEvent } from "react";
 import {
   crearUsuario,
   actualizarRolUsuario,
-  cambiarPasswordUsuario,
   enviarCorreoRecuperacion,
   ETIQUETAS_ROL,
 } from "../services/usuario.service";
@@ -15,7 +14,7 @@ import { useToast } from "../context/ToastContext";
 import CampoPassword from "./CampoPassword";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 
-const ROLES_ASIGNABLES: Rol[] = ["FELIGRES", "ENCARGADO_ORGANISMO", "ENCARGADO_COMEDOR"];
+const ROLES_ASIGNABLES: Rol[] = ["FELIGRES", "ENCARGADO_ORGANISMO", "ENCARGADO_COMEDOR", "SECRETARIA"];
 
 function normalizar(texto: string) {
   return texto
@@ -36,11 +35,8 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
   const dialogoRef = useRef<HTMLDialogElement>(null);
   const [rol, setRol] = useState<Rol>(usuario.rol);
   const [organismoId, setOrganismoId] = useState(usuario.organismoId ?? "");
-  const [password, setPassword] = useState("");
-  const [confirmarPassword, setConfirmarPassword] = useState("");
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
-  const [confirmando, setConfirmando] = useState(false);
   const [confirmandoCorreo, setConfirmandoCorreo] = useState(false);
 
   const cambioRol =
@@ -53,11 +49,11 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
     return () => dialogo?.close();
   }, []);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!cambioRol && !password) {
+    if (!cambioRol) {
       setError("No hay cambios para guardar");
       return;
     }
@@ -65,34 +61,16 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
       setError("Selecciona un organismo para el encargado");
       return;
     }
-    if (password && password !== confirmarPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
 
-    if (password) {
-      setConfirmando(true);
-      return;
-    }
-    guardar();
-  }
-
-  async function guardar() {
     setGuardando(true);
     try {
-      if (cambioRol) {
-        await actualizarRolUsuario(usuario.id, {
-          rol,
-          ...(rol === "ENCARGADO_ORGANISMO" ? { organismoId } : {}),
-        });
-      }
-      if (password) {
-        await cambiarPasswordUsuario(usuario.id, password);
-      }
+      await actualizarRolUsuario(usuario.id, {
+        rol,
+        ...(rol === "ENCARGADO_ORGANISMO" ? { organismoId } : {}),
+      });
       mostrarToast("Usuario actualizado con exito");
       onGuardado();
     } catch (err) {
-      setConfirmando(false);
       setError(err instanceof Error ? err.message : "No se pudo actualizar el usuario");
     } finally {
       setGuardando(false);
@@ -140,34 +118,6 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
     );
   }
 
-  if (confirmando) {
-    return (
-      <dialog
-        ref={dialogoRef}
-        className="dialogo-confirmacion"
-        onCancel={(e) => {
-          e.preventDefault();
-          setConfirmando(false);
-        }}
-      >
-        <h2>Cambiar contraseña</h2>
-        <p>
-          ¿Seguro que quieres cambiar la contraseña de "{usuario.nombre}"?
-          {cambioRol && ` También se cambiará su rol a ${ETIQUETAS_ROL[rol]}.`} Tendrá que usar la
-          nueva contraseña para iniciar sesión.
-        </p>
-        <div className="dialogo-acciones">
-          <button type="button" className="boton boton-secundario" onClick={() => setConfirmando(false)}>
-            Volver
-          </button>
-          <button type="button" className="boton boton-principal" onClick={guardar} disabled={guardando}>
-            {guardando ? "Guardando..." : "Cambiar contraseña"}
-          </button>
-        </div>
-      </dialog>
-    );
-  }
-
   return (
     <dialog ref={dialogoRef} className="dialogo-confirmacion" onCancel={onCerrar}>
       <h2>Editar usuario</h2>
@@ -203,15 +153,9 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
           </>
         )}
 
-        <label htmlFor="editarPassword">Nueva contraseña</label>
-        <CampoPassword
-          id="editarPassword"
-          value={password}
-          onChange={setPassword}
-          minLength={LARGO_MINIMO_PASSWORD}
-          autoComplete="new-password"
-        />
-        <p className="dialogo-ayuda">Déjala vacía si no quieres cambiarla.</p>
+        <p className="dialogo-ayuda dialogo-ayuda-separada">
+          La contraseña solo la cambia el usuario, con un enlace que le llega por correo.
+        </p>
         <button
           type="button"
           className="boton-enlace"
@@ -222,19 +166,6 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
         >
           Enviar correo de recuperación
         </button>
-
-        {password && (
-          <>
-            <label htmlFor="editarConfirmarPassword">Confirmar contraseña</label>
-            <CampoPassword
-              id="editarConfirmarPassword"
-              value={confirmarPassword}
-              onChange={setConfirmarPassword}
-              autoComplete="new-password"
-              required
-            />
-          </>
-        )}
 
         {error && <p className="login-error">{error}</p>}
 

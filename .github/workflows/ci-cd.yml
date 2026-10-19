@@ -49,6 +49,11 @@ jobs:
           mkdir -p ~/parroquia-uploads
           ln -sfn ~/parroquia-uploads ./backend/uploads
 
+      - name: Enlazar carpeta de documentos
+        run: |
+          mkdir -p ~/parroquia-documentos
+          ln -sfn ~/parroquia-documentos ./backend/documentos
+
       - name: Instalar y preparar Backend
         working-directory: backend
         run: |
