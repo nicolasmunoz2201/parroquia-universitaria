@@ -3,24 +3,36 @@ import type { FormEvent } from "react";
 import {
   cancelarSolicitud,
   crearSolicitud,
+  listarDocumentosRequeridos,
   listarHorariosDisponibles,
   listarMisSolicitudes,
 } from "../services/sacramento.service";
-import type { HorarioConCupos, SolicitudSacramento } from "../services/sacramento.service";
+import type {
+  DocumentoElegido,
+  DocumentosRequeridos,
+  HorarioConCupos,
+  SolicitudSacramento,
+} from "../services/sacramento.service";
 import {
   ESTADOS_CANCELABLES,
+  ESTADOS_CON_OBSERVACION,
   ETIQUETAS_ESTADO,
   ETIQUETAS_SACRAMENTO,
   TIPOS_SACRAMENTO,
 } from "../constants/sacramentos";
 import type { TipoSacramento } from "../constants/sacramentos";
+import { MAX_TAMANO_DOCUMENTO_MB } from "../constants/archivos";
 import { useCarga } from "../hooks/useCarga";
 import { useToast } from "../context/ToastContext";
 import { esFechaPasada, formatearFechaHora } from "../utils/fechas";
 import ConfirmarAccion from "./ConfirmarAccion";
+import CampoDocumento from "./CampoDocumento";
+import CorregirDocumentos from "./CorregirDocumentos";
+import ListaDocumentos from "./ListaDocumentos";
 
 const SIN_HORARIOS: HorarioConCupos[] = [];
 const SIN_SOLICITUDES: SolicitudSacramento[] = [];
+const SIN_REQUISITOS: DocumentosRequeridos = {};
 
 export default function MisSacramentos() {
   const { mostrarToast } = useToast();
@@ -41,20 +53,33 @@ export default function MisSacramentos() {
     cargando: cargandoHorarios,
     recargar: recargarHorarios,
   } = useCarga(cargarHorarios, SIN_HORARIOS, "No se pudieron cargar los horarios");
+  const { datos: requisitos } = useCarga(
+    listarDocumentosRequeridos,
+    SIN_REQUISITOS,
+    "No se pudieron cargar los documentos requeridos"
+  );
 
   const [horarioId, setHorarioId] = useState("");
   const [nombreBeneficiario, setNombreBeneficiario] = useState("");
   const [comentario, setComentario] = useState("");
+  const [archivos, setArchivos] = useState<Record<string, File | null>>({});
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [porCancelar, setPorCancelar] = useState<SolicitudSacramento | null>(null);
+  const [porCorregir, setPorCorregir] = useState<SolicitudSacramento | null>(null);
 
   const horarioElegido = horarios.find((horario) => horario.id === horarioId);
+  const requeridos = tipo ? (requisitos[tipo] ?? []) : [];
+  const documentosElegidos: DocumentoElegido[] = requeridos.flatMap((tipoDocumento) => {
+    const archivo = archivos[tipoDocumento];
+    return archivo ? [{ tipoDocumento, archivo }] : [];
+  });
 
   function handleCambiarTipo(nuevoTipo: TipoSacramento | "") {
     setTipo(nuevoTipo);
     setHorarioId("");
+    setArchivos({});
     setError("");
   }
 
@@ -69,6 +94,11 @@ export default function MisSacramentos() {
       setError("Indica el nombre de quien recibirá el sacramento");
       return;
     }
+    const faltante = requeridos.find((tipoDocumento) => !archivos[tipoDocumento]);
+    if (faltante) {
+      setError(`Falta subir: ${faltante}`);
+      return;
+    }
     setConfirmando(true);
   }
 
@@ -80,10 +110,12 @@ export default function MisSacramentos() {
         horarioId,
         nombreBeneficiario: nombreBeneficiario.trim(),
         comentario: comentario.trim(),
+        documentos: documentosElegidos,
       });
       setHorarioId("");
       setNombreBeneficiario("");
       setComentario("");
+      setArchivos({});
       mostrarToast("Solicitud enviada. Te avisaremos por correo cada cambio de estado.");
       await Promise.all([recargar(), recargarHorarios()]);
     } catch (err) {
@@ -105,6 +137,12 @@ export default function MisSacramentos() {
     } catch (err) {
       mostrarToast(err instanceof Error ? err.message : "No se pudo cancelar la solicitud", "error");
     }
+  }
+
+  async function handleCorregida() {
+    setPorCorregir(null);
+    mostrarToast("Documentos enviados. La secretaría revisará tu solicitud de nuevo.");
+    await recargar();
   }
 
   return (
@@ -163,6 +201,33 @@ export default function MisSacramentos() {
           </fieldset>
         )}
 
+        {tipo && (
+          <fieldset className="grupo-horarios">
+            <legend>Documentos</legend>
+            {requeridos.length === 0 ? (
+              <p className="dialogo-ayuda">Este sacramento no necesita documentos.</p>
+            ) : (
+              <>
+                <p className="dialogo-ayuda">
+                  Sube cada documento en PDF, de hasta {MAX_TAMANO_DOCUMENTO_MB} MB. Solo la secretaría podrá verlos.
+                </p>
+                <div className="lista-campos-documento">
+                  {requeridos.map((tipoDocumento, i) => (
+                    <CampoDocumento
+                      key={tipoDocumento}
+                      id={`documento-${i}`}
+                      nombre={tipoDocumento}
+                      archivo={archivos[tipoDocumento] ?? null}
+                      onElegir={(archivo) => setArchivos((previos) => ({ ...previos, [tipoDocumento]: archivo }))}
+                      onError={setError}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </fieldset>
+        )}
+
         <label htmlFor="nombreBeneficiario">¿Quién recibirá el sacramento?</label>
         <input
           id="nombreBeneficiario"
@@ -199,16 +264,28 @@ export default function MisSacramentos() {
                 </strong>
                 <span>{formatearFechaHora(solicitud.horario.inicio)}</span>
                 <span>{solicitud.horario.lugar ?? "Parroquia Universitaria"}</span>
-                {solicitud.observacion && (
+                {solicitud.observacion && ESTADOS_CON_OBSERVACION.includes(solicitud.estado) && (
                   <span className="fila-solicitud-observacion">
                     Observación de la secretaría: {solicitud.observacion}
                   </span>
                 )}
+                <ListaDocumentos documentos={solicitud.documentos} />
               </div>
               <div className="fila-solicitud-acciones">
                 <span className={`estado-solicitud estado-${solicitud.estado.toLowerCase()}`}>
                   {ETIQUETAS_ESTADO[solicitud.estado]}
                 </span>
+                {solicitud.estado === "OBSERVADA" &&
+                  !esFechaPasada(solicitud.horario.inicio) &&
+                  (requisitos[solicitud.horario.tipo] ?? []).length > 0 && (
+                    <button
+                      type="button"
+                      className="boton boton-principal boton-chico"
+                      onClick={() => setPorCorregir(solicitud)}
+                    >
+                      Corregir documentos
+                    </button>
+                  )}
                 {ESTADOS_CANCELABLES.includes(solicitud.estado) && !esFechaPasada(solicitud.horario.inicio) && (
                   <button
                     type="button"
@@ -242,6 +319,15 @@ export default function MisSacramentos() {
           peligro
           onConfirmar={handleCancelar}
           onCancelar={() => setPorCancelar(null)}
+        />
+      )}
+
+      {porCorregir && (
+        <CorregirDocumentos
+          solicitud={porCorregir}
+          requeridos={requisitos[porCorregir.horario.tipo] ?? []}
+          onCorregida={handleCorregida}
+          onCancelar={() => setPorCorregir(null)}
         />
       )}
     </div>

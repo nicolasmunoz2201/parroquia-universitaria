@@ -30,6 +30,7 @@ import {
   unirFechaYHora,
 } from "../utils/fechas";
 import ConfirmarAccion from "./ConfirmarAccion";
+import ListaDocumentos from "./ListaDocumentos";
 
 const SIN_HORARIOS: HorarioConCupos[] = [];
 const SIN_SOLICITUDES: SolicitudSacramento[] = [];
@@ -173,8 +174,12 @@ function PanelSolicitudes() {
                 </span>
                 {solicitud.comentario && <span>Comentario: {solicitud.comentario}</span>}
                 {solicitud.observacion && (
-                  <span className="fila-solicitud-observacion">Observación: {solicitud.observacion}</span>
+                  <span className="fila-solicitud-observacion">
+                    {ESTADOS_CON_OBSERVACION.includes(solicitud.estado) ? "Observación" : "Observación anterior"}:{" "}
+                    {solicitud.observacion}
+                  </span>
                 )}
+                <ListaDocumentos documentos={solicitud.documentos} />
               </div>
               <div className="fila-solicitud-acciones">
                 <span className={`estado-solicitud estado-${solicitud.estado.toLowerCase()}`}>

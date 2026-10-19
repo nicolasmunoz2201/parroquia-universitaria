@@ -1,5 +1,19 @@
-import { peticion } from "./api";
+import { peticion, peticionArchivo } from "./api";
 import type { EstadoSolicitud, TipoSacramento } from "../constants/sacramentos";
+
+export type DocumentosRequeridos = Partial<Record<TipoSacramento, string[]>>;
+
+export interface DocumentoSolicitud {
+  id: string;
+  tipoDocumento: string;
+  nombreOriginal: string;
+  createdAt: string;
+}
+
+export interface DocumentoElegido {
+  tipoDocumento: string;
+  archivo: File;
+}
 
 export interface Horario {
   id: string;
@@ -24,6 +38,29 @@ export interface SolicitudSacramento {
   createdAt: string;
   horario: Horario;
   solicitante: { id: string; nombre: string; email: string };
+  documentos: DocumentoSolicitud[];
+}
+
+function formularioConDocumentos(campos: Record<string, string>, documentos: DocumentoElegido[]) {
+  const formData = new FormData();
+  for (const [campo, valor] of Object.entries(campos)) {
+    formData.append(campo, valor);
+  }
+  formData.append("tiposDocumento", JSON.stringify(documentos.map((documento) => documento.tipoDocumento)));
+  for (const documento of documentos) {
+    formData.append("documentos", documento.archivo);
+  }
+  return formData;
+}
+
+export function listarDocumentosRequeridos(): Promise<DocumentosRequeridos> {
+  return peticion("/api/sacramentos/documentos-requeridos", "No se pudieron cargar los documentos requeridos", {
+    auth: true,
+  });
+}
+
+export function obtenerDocumento(id: string): Promise<Blob> {
+  return peticionArchivo(`/api/sacramentos/documentos/${id}`, "No se pudo abrir el documento");
 }
 
 export function listarHorariosDisponibles(tipo: TipoSacramento): Promise<HorarioConCupos[]> {
@@ -64,15 +101,27 @@ export function eliminarHorario(id: string): Promise<void> {
   });
 }
 
-export function crearSolicitud(datos: {
+export function crearSolicitud({
+  documentos,
+  ...campos
+}: {
   horarioId: string;
   nombreBeneficiario: string;
   comentario: string;
+  documentos: DocumentoElegido[];
 }): Promise<SolicitudSacramento> {
   return peticion("/api/sacramentos/solicitudes", "No se pudo enviar la solicitud", {
     method: "POST",
     auth: true,
-    json: datos,
+    formData: formularioConDocumentos(campos, documentos),
+  });
+}
+
+export function corregirDocumentos(id: string, documentos: DocumentoElegido[]): Promise<SolicitudSacramento> {
+  return peticion(`/api/sacramentos/solicitudes/${id}/documentos`, "No se pudieron enviar los documentos", {
+    method: "PATCH",
+    auth: true,
+    formData: formularioConDocumentos({}, documentos),
   });
 }
 
