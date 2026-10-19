@@ -14,7 +14,17 @@ const CONTAR_OCUPADOS = {
 const INCLUIR_SOLICITUD = {
   horario: true,
   solicitante: { select: { id: true, nombre: true, email: true } },
+  documentos: {
+    select: { id: true, tipoDocumento: true, nombreOriginal: true, createdAt: true },
+    orderBy: { createdAt: "asc" },
+  },
 } as const;
+
+export interface DocumentoNuevo {
+  tipoDocumento: string;
+  archivo: string;
+  nombreOriginal: string;
+}
 
 type HorarioConConteo = Prisma.HorarioSacramentoGetPayload<{ include: typeof CONTAR_OCUPADOS }>;
 
@@ -69,11 +79,15 @@ export async function eliminarHorario(id: string) {
   return true;
 }
 
-export function crearSolicitud(data: {
+export function crearSolicitud({
+  documentos,
+  ...data
+}: {
   horarioId: string;
   solicitanteId: string;
   nombreBeneficiario: string;
   comentario: string | null;
+  documentos: DocumentoNuevo[];
 }) {
   return prisma.$transaction(
     async (tx) => {
@@ -100,7 +114,10 @@ export function crearSolicitud(data: {
         throw new SolicitudInvalidaError("Ya tienes una solicitud en este horario");
       }
 
-      return tx.solicitudSacramento.create({ data, include: INCLUIR_SOLICITUD });
+      return tx.solicitudSacramento.create({
+        data: { ...data, documentos: { create: documentos } },
+        include: INCLUIR_SOLICITUD,
+      });
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
   );
@@ -124,6 +141,33 @@ export function listarSolicitudes(estado?: EstadoSolicitud) {
 
 export function obtenerSolicitud(id: string) {
   return prisma.solicitudSacramento.findUnique({ where: { id }, include: INCLUIR_SOLICITUD });
+}
+
+export function obtenerDocumento(id: string) {
+  return prisma.documentoSolicitud.findUnique({
+    where: { id },
+    include: { solicitud: { select: { solicitanteId: true } } },
+  });
+}
+
+export function reemplazarDocumentos(solicitudId: string, documentos: DocumentoNuevo[]) {
+  return prisma.$transaction(async (tx) => {
+    const tipos = documentos.map((documento) => documento.tipoDocumento);
+    const anteriores = await tx.documentoSolicitud.findMany({
+      where: { solicitudId, tipoDocumento: { in: tipos } },
+      select: { archivo: true },
+    });
+    await tx.documentoSolicitud.deleteMany({ where: { solicitudId, tipoDocumento: { in: tipos } } });
+    const solicitud = await tx.solicitudSacramento.update({
+      where: { id: solicitudId, estado: EstadoSolicitud.OBSERVADA },
+      data: {
+        estado: EstadoSolicitud.PENDIENTE,
+        documentos: { create: documentos },
+      },
+      include: INCLUIR_SOLICITUD,
+    });
+    return { solicitud, archivosAnteriores: anteriores.map((documento) => documento.archivo) };
+  });
 }
 
 export function actualizarEstadoSolicitud(

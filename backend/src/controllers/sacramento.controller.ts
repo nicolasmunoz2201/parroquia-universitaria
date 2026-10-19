@@ -1,14 +1,18 @@
 import { Request, Response } from "express";
 import { EstadoSolicitud, Prisma, TipoSacramento } from "../generated/prisma/client";
 import * as sacramentoService from "../services/sacramento.service";
-import { SolicitudInvalidaError } from "../services/sacramento.service";
+import { DocumentoNuevo, SolicitudInvalidaError } from "../services/sacramento.service";
 import { correoConfigurado, enviarCorreoEstadoSolicitud } from "../utils/correo";
 import { leerTexto } from "../utils/validaciones";
+import { eliminarDocumentosGuardados, rutaDocumento } from "../config/documentos";
+import { LARGO_MAXIMO_NOMBRE_ARCHIVO } from "../constants/archivos";
 import {
+  DOCUMENTOS_REQUERIDOS,
   ESTADOS_CANCELABLES,
   ESTADOS_CON_OBSERVACION,
   LARGO_MAXIMO_TEXTO,
   MAX_CUPOS_POR_HORARIO,
+  ROLES_GESTION_SACRAMENTOS,
   TRANSICIONES_ESTADO,
 } from "../constants/sacramentos";
 
@@ -31,6 +35,51 @@ function leerTextoOpcional(valor: unknown) {
 function notificar(solicitud: Parameters<typeof enviarCorreoEstadoSolicitud>[0]) {
   if (!correoConfigurado()) return;
   enviarCorreoEstadoSolicitud(solicitud).catch((error) => console.error(error));
+}
+
+function leerTiposDocumento(valor: unknown): unknown {
+  if (typeof valor !== "string") return valor ?? [];
+  try {
+    return JSON.parse(valor);
+  } catch {
+    return null;
+  }
+}
+
+function leerDocumentosSubidos(req: Request): DocumentoNuevo[] | null {
+  const archivos = (req.files as Express.Multer.File[] | undefined) ?? [];
+  const tipos = leerTiposDocumento(req.body?.tiposDocumento);
+  if (
+    !Array.isArray(tipos) ||
+    tipos.length !== archivos.length ||
+    !tipos.every((tipo) => typeof tipo === "string")
+  ) {
+    return null;
+  }
+  return archivos.map((archivo, i) => ({
+    tipoDocumento: tipos[i] ?? "",
+    archivo: archivo.filename,
+    nombreOriginal: archivo.originalname.slice(0, LARGO_MAXIMO_NOMBRE_ARCHIVO),
+  }));
+}
+
+function problemaConDocumentos(documentos: DocumentoNuevo[], requeridos: string[], exigirTodos: boolean) {
+  const tipos = documentos.map((documento) => documento.tipoDocumento);
+  if (tipos.some((tipo) => !requeridos.includes(tipo))) {
+    return "Uno de los documentos no corresponde a este sacramento";
+  }
+  if (new Set(tipos).size !== tipos.length) {
+    return "Subiste dos archivos para el mismo documento";
+  }
+  if (exigirTodos) {
+    const faltante = requeridos.find((requerido) => !tipos.includes(requerido));
+    return faltante ? `Falta subir: ${faltante}` : null;
+  }
+  return tipos.length === 0 ? "Sube al menos un documento corregido" : null;
+}
+
+export function documentosRequeridos(_req: Request, res: Response) {
+  res.json(DOCUMENTOS_REQUERIDOS);
 }
 
 export async function horariosDisponibles(req: Request, res: Response) {
@@ -123,12 +172,29 @@ export async function crearSolicitud(req: Request, res: Response) {
     return;
   }
 
+  const documentos = leerDocumentosSubidos(req);
+  if (!documentos) {
+    res.status(400).json({ message: "No se pudieron leer los documentos enviados" });
+    return;
+  }
+  const horario = await sacramentoService.obtenerHorario(horarioId);
+  if (!horario) {
+    res.status(409).json({ message: "El horario seleccionado no esta disponible" });
+    return;
+  }
+  const problema = problemaConDocumentos(documentos, DOCUMENTOS_REQUERIDOS[horario.tipo], true);
+  if (problema) {
+    res.status(400).json({ message: problema });
+    return;
+  }
+
   try {
     const solicitud = await sacramentoService.crearSolicitud({
       horarioId,
       solicitanteId: req.usuario!.id,
       nombreBeneficiario,
       comentario,
+      documentos,
     });
     notificar(solicitud);
     res.status(201).json(solicitud);
@@ -196,6 +262,60 @@ export async function cambiarEstadoSolicitud(req: Request, res: Response) {
   );
   notificar(actualizada);
   res.json(actualizada);
+}
+
+export async function corregirDocumentos(req: Request, res: Response) {
+  const solicitud = await sacramentoService.obtenerSolicitud(req.params.id as string);
+  if (!solicitud || solicitud.solicitanteId !== req.usuario!.id) {
+    res.status(404).json({ message: "Solicitud no encontrada" });
+    return;
+  }
+  if (solicitud.estado !== EstadoSolicitud.OBSERVADA) {
+    res.status(409).json({ message: "Solo puedes corregir documentos de una solicitud con observaciones" });
+    return;
+  }
+  if (solicitud.horario.inicio <= new Date()) {
+    res.status(409).json({ message: "La fecha del sacramento ya paso" });
+    return;
+  }
+
+  const documentos = leerDocumentosSubidos(req);
+  if (!documentos) {
+    res.status(400).json({ message: "No se pudieron leer los documentos enviados" });
+    return;
+  }
+  const problema = problemaConDocumentos(documentos, DOCUMENTOS_REQUERIDOS[solicitud.horario.tipo], false);
+  if (problema) {
+    res.status(400).json({ message: problema });
+    return;
+  }
+
+  const { solicitud: corregida, archivosAnteriores } = await sacramentoService.reemplazarDocumentos(
+    solicitud.id,
+    documentos
+  );
+  eliminarDocumentosGuardados(archivosAnteriores);
+  res.json(corregida);
+}
+
+export async function verDocumento(req: Request, res: Response) {
+  const documento = await sacramentoService.obtenerDocumento(req.params.id as string);
+  const usuario = req.usuario!;
+  const puedeVer =
+    documento &&
+    (documento.solicitud.solicitanteId === usuario.id || ROLES_GESTION_SACRAMENTOS.includes(usuario.rol));
+  if (!documento || !puedeVer) {
+    res.status(404).json({ message: "Documento no encontrado" });
+    return;
+  }
+
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "private, no-store");
+  res.sendFile(rutaDocumento(documento.archivo), (error) => {
+    if (error && !res.headersSent) {
+      res.status(404).json({ message: "El archivo ya no esta disponible" });
+    }
+  });
 }
 
 export async function cancelarSolicitud(req: Request, res: Response) {
