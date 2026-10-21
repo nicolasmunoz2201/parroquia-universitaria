@@ -4,6 +4,7 @@ import {
   ESTADOS_QUE_OCUPAN_CUPO,
   MAX_SOLICITUDES_POR_PERSONA_POR_HORARIO,
 } from "../constants/sacramentos";
+import { calcularCuposDisponibles } from "../utils/sacramentos";
 
 export class SolicitudInvalidaError extends Error {}
 
@@ -32,7 +33,7 @@ function conCupos({ _count, ...horario }: HorarioConConteo) {
   return {
     ...horario,
     ocupados: _count.solicitudes,
-    cuposDisponibles: Math.max(horario.cupos - _count.solicitudes, 0),
+    cuposDisponibles: calcularCuposDisponibles(horario.cupos, _count.solicitudes),
   };
 }
 

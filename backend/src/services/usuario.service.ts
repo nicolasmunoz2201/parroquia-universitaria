@@ -1,12 +1,7 @@
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
 import prisma from "../config/prisma";
 import type { Rol } from "../generated/prisma/client";
-import { HORAS_VALIDEZ_RECUPERACION, RONDAS_BCRYPT } from "../constants/autenticacion";
-
-function hashearCodigo(codigo: string) {
-  return crypto.createHash("sha256").update(codigo).digest("hex");
-}
+import { HORAS_VALIDEZ_RECUPERACION } from "../constants/autenticacion";
+import { encriptarPassword, generarCodigoRecuperacion, hashearCodigo } from "../utils/password";
 
 const SELECT_SEGURO = {
   id: true,
@@ -32,7 +27,7 @@ export async function crearUsuario(data: {
   rol: Rol;
   organismoId: string | null;
 }) {
-  const passwordHasheada = await bcrypt.hash(data.password, RONDAS_BCRYPT);
+  const passwordHasheada = await encriptarPassword(data.password);
   return prisma.usuario.create({
     data: { ...data, password: passwordHasheada },
     select: SELECT_SEGURO,
@@ -52,7 +47,7 @@ export function actualizarRolUsuario(id: string, data: { rol: Rol; organismoId: 
 }
 
 export async function cambiarPassword(id: string, password: string) {
-  const passwordHasheada = await bcrypt.hash(password, RONDAS_BCRYPT);
+  const passwordHasheada = await encriptarPassword(password);
   const { tokenVersion } = await prisma.usuario.update({
     where: { id },
     data: {
@@ -67,7 +62,7 @@ export async function cambiarPassword(id: string, password: string) {
 }
 
 export async function crearCodigoRecuperacion(id: string) {
-  const codigo = crypto.randomBytes(32).toString("hex");
+  const codigo = generarCodigoRecuperacion();
   await prisma.usuario.update({
     where: { id },
     data: {
@@ -92,7 +87,7 @@ export async function restablecerPassword(codigo: string, password: string) {
     return false;
   }
 
-  const passwordHasheada = await bcrypt.hash(password, RONDAS_BCRYPT);
+  const passwordHasheada = await encriptarPassword(password);
   const { count } = await prisma.usuario.updateMany({
     where: { id: usuario.id, recuperacionHash },
     data: {
