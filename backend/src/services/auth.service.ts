@@ -1,9 +1,9 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
 import { Rol } from "../generated/prisma/client";
 import * as usuarioService from "./usuario.service";
 import { DURACION_SESION } from "../constants/autenticacion";
+import { compararPassword } from "../utils/password";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -41,7 +41,7 @@ export async function login(email: string, password: string) {
     return null;
   }
 
-  const passwordValida = await bcrypt.compare(password, usuario.password);
+  const passwordValida = await compararPassword(password, usuario.password);
   if (!passwordValida) {
     return null;
   }
@@ -69,7 +69,7 @@ export async function cambiarPasswordPropia(id: string, passwordActual: string, 
     return null;
   }
 
-  const passwordValida = await bcrypt.compare(passwordActual, usuario.password);
+  const passwordValida = await compararPassword(passwordActual, usuario.password);
   if (!passwordValida) {
     return null;
   }

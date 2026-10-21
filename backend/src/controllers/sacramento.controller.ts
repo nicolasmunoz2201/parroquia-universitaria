@@ -4,6 +4,7 @@ import * as sacramentoService from "../services/sacramento.service";
 import { DocumentoNuevo, SolicitudInvalidaError } from "../services/sacramento.service";
 import { correoConfigurado, enviarCorreoEstadoSolicitud } from "../utils/correo";
 import { leerTexto } from "../utils/validaciones";
+import { problemaConDocumentos } from "../utils/sacramentos";
 import { eliminarDocumentosGuardados, rutaDocumento } from "../config/documentos";
 import { LARGO_MAXIMO_NOMBRE_ARCHIVO } from "../constants/archivos";
 import {
@@ -61,21 +62,6 @@ function leerDocumentosSubidos(req: Request): DocumentoNuevo[] | null {
     archivo: archivo.filename,
     nombreOriginal: archivo.originalname.slice(0, LARGO_MAXIMO_NOMBRE_ARCHIVO),
   }));
-}
-
-function problemaConDocumentos(documentos: DocumentoNuevo[], requeridos: string[], exigirTodos: boolean) {
-  const tipos = documentos.map((documento) => documento.tipoDocumento);
-  if (tipos.some((tipo) => !requeridos.includes(tipo))) {
-    return "Uno de los documentos no corresponde a este sacramento";
-  }
-  if (new Set(tipos).size !== tipos.length) {
-    return "Subiste dos archivos para el mismo documento";
-  }
-  if (exigirTodos) {
-    const faltante = requeridos.find((requerido) => !tipos.includes(requerido));
-    return faltante ? `Falta subir: ${faltante}` : null;
-  }
-  return tipos.length === 0 ? "Sube al menos un documento corregido" : null;
 }
 
 export function documentosRequeridos(_req: Request, res: Response) {
