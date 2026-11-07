@@ -8,7 +8,9 @@ import DashboardUsuarios from "./components/DashboardUsuarios";
 import RestablecerPassword from "./components/RestablecerPassword";
 import MisSacramentos from "./components/MisSacramentos";
 import DashboardAgendamientos from "./components/DashboardAgendamientos";
+import DashboardInventario from "./components/DashboardInventario";
 import { ROLES_GESTION_SACRAMENTOS } from "./constants/sacramentos";
+import { ROLES_INVENTARIO } from "./constants/inventario";
 import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
 import { logout, obtenerSesion } from "./services/auth.service";
@@ -114,6 +116,7 @@ function App() {
             {vista === "agendamientos" && usuario && ROLES_GESTION_SACRAMENTOS.includes(usuario.rol) && (
               <DashboardAgendamientos />
             )}
+            {vista === "inventario" && usuario && ROLES_INVENTARIO.includes(usuario.rol) && <DashboardInventario />}
           </>
         )}
       </main>
