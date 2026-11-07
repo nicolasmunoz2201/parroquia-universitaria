@@ -112,7 +112,10 @@
 .opcion-horario-fecha {
   font-size: 14px;
   font-weight: 600;
-  text-transform: capitalize;
+}
+
+.opcion-horario-fecha::first-letter {
+  text-transform: uppercase;
 }
 
 .opcion-horario-detalle {
@@ -138,8 +141,8 @@
   color: var(--ink-soft);
 }
 
-.fila-solicitud-info span:first-of-type {
-  text-transform: capitalize;
+.fila-solicitud-info span:first-of-type::first-letter {
+  text-transform: uppercase;
 }
 
 .fila-solicitud-info .fila-solicitud-observacion {

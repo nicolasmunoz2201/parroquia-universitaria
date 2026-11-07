@@ -1,5 +1,6 @@
 import type { Usuario } from "../services/auth.service";
 import { ROLES_GESTION_SACRAMENTOS } from "../constants/sacramentos";
+import { ROLES_INVENTARIO } from "../constants/inventario";
 
 export type Vista =
   | "inicio"
@@ -9,7 +10,8 @@ export type Vista =
   | "organismos"
   | "usuarios"
   | "sacramentos"
-  | "agendamientos";
+  | "agendamientos"
+  | "inventario";
 
 interface Props {
   usuario: Usuario | null;
@@ -32,6 +34,7 @@ export default function Sidebar({
 }: Props) {
   const esAdmin = usuario?.rol === "ADMINISTRADOR";
   const gestionaSacramentos = !!usuario && ROLES_GESTION_SACRAMENTOS.includes(usuario.rol);
+  const gestionaInventario = !!usuario && ROLES_INVENTARIO.includes(usuario.rol);
   function navegar(vista: Vista) {
     onNavegar(vista);
     onCerrar();
@@ -77,6 +80,14 @@ export default function Sidebar({
               onClick={() => navegar("agendamientos")}
             >
               Agendamientos
+            </button>
+          )}
+          {gestionaInventario && (
+            <button
+              className={`sidebar-link ${vistaActual === "inventario" ? "activo" : ""}`}
+              onClick={() => navegar("inventario")}
+            >
+              Inventario del comedor
             </button>
           )}
           {puedeGestionar && (

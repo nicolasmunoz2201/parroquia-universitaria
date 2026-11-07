@@ -32,6 +32,27 @@ enum EstadoSolicitud {
   REALIZADA
 }
 
+enum UnidadMedida {
+  KILOGRAMO
+  LITRO
+  UNIDAD
+  PAQUETE
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+enum MotivoMovimiento {
+  DONACION
+  COMPRA
+  CONSUMO
+  MERMA
+  VENCIMIENTO
+  CONTEO_FISICO
+}
+
 model Usuario {
   id            String          @id @default(cuid())
   nombre        String
@@ -47,6 +68,7 @@ model Usuario {
   publicaciones Publicacion[]
   hitos         HitoHistorico[]
   solicitudesSacramento SolicitudSacramento[]
+  movimientosInventario MovimientoInventario[]
 }
 
 model Organismo {
@@ -138,4 +160,56 @@ model DocumentoSolicitud {
   solicitud      SolicitudSacramento @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
   solicitudId    String
   createdAt      DateTime            @default(now())
+}
+
+model Insumo {
+  id          String                 @id @default(cuid())
+  nombre      String                 @unique
+  categoria   String
+  unidad      UnidadMedida
+  stockMinimo Float                  @default(0)
+  activo      Boolean                @default(true)
+  lotes       Lote[]
+  movimientos MovimientoInventario[]
+  createdAt   DateTime               @default(now())
+}
+
+model Donante {
+  id        String   @id @default(cuid())
+  nombre    String   @unique
+  contacto  String?
+  lotes     Lote[]
+  createdAt DateTime @default(now())
+}
+
+model Lote {
+  id                 String                 @id @default(cuid())
+  insumo             Insumo                 @relation(fields: [insumoId], references: [id])
+  insumoId           String
+  cantidadInicial    Float
+  cantidadDisponible Float
+  fechaVencimiento   DateTime?
+  donante            Donante?               @relation(fields: [donanteId], references: [id])
+  donanteId          String?
+  movimientos        MovimientoInventario[]
+  createdAt          DateTime               @default(now())
+
+  @@index([insumoId, fechaVencimiento])
+}
+
+model MovimientoInventario {
+  id          String           @id @default(cuid())
+  tipo        TipoMovimiento
+  motivo      MotivoMovimiento
+  cantidad    Float
+  observacion String?
+  insumo      Insumo           @relation(fields: [insumoId], references: [id])
+  insumoId    String
+  lote        Lote?            @relation(fields: [loteId], references: [id])
+  loteId      String?
+  usuario     Usuario          @relation(fields: [usuarioId], references: [id])
+  usuarioId   String
+  createdAt   DateTime         @default(now())
+
+  @@index([insumoId, createdAt])
 }
