@@ -18,7 +18,7 @@ import {
 } from "../constants/inventario";
 import type { UnidadMedida } from "../constants/inventario";
 import { useCarga } from "../hooks/useCarga";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import { formatearCantidad, formatearFechaCorta, pasoCantidad, textoDiasParaVencer } from "../utils/inventario";
 import ConfirmarAccion from "./ConfirmarAccion";
 
@@ -327,13 +327,15 @@ export default function InventarioInsumos() {
                 >
                   {insumo.activo ? "Desactivar" : "Activar"}
                 </button>
-                <button
-                  type="button"
-                  className="boton boton-peligro-borde boton-chico"
-                  onClick={() => setPorEliminar(insumo)}
-                >
-                  Eliminar
-                </button>
+                {!insumo.tieneMovimientos && (
+                  <button
+                    type="button"
+                    className="boton boton-peligro-borde boton-chico"
+                    onClick={() => setPorEliminar(insumo)}
+                  >
+                    Eliminar
+                  </button>
+                )}
               </div>
             </li>
           ))}
@@ -349,7 +351,7 @@ export default function InventarioInsumos() {
       {porEliminar && (
         <ConfirmarAccion
           titulo="Eliminar insumo"
-          mensaje={`¿Eliminar "${porEliminar.nombre}"? Solo se puede eliminar si no tiene movimientos; si los tiene, desactívalo.`}
+          mensaje={`¿Eliminar "${porEliminar.nombre}"? Todavía no tiene movimientos, así que se borrará por completo.`}
           textoConfirmar="Eliminar"
           peligro
           onConfirmar={handleEliminar}

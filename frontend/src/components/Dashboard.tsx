@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { cambiarMiPassword } from "../services/auth.service";
 import type { Usuario } from "../services/auth.service";
 import { ETIQUETAS_ROL } from "../services/usuario.service";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import CampoPassword from "./CampoPassword";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 

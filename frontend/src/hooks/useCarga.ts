@@ -18,8 +18,23 @@ export function useCarga<T>(cargar: () => Promise<T>, valorInicial: T, mensajeEr
   }, [cargar, mensajeError]);
 
   useEffect(() => {
-    recargar();
-  }, [recargar]);
+    let vigente = true;
+    cargar()
+      .then((resultado) => {
+        if (!vigente) return;
+        setDatos(resultado);
+        setError("");
+      })
+      .catch((err) => {
+        if (vigente) setError(err instanceof Error ? err.message : mensajeError);
+      })
+      .finally(() => {
+        if (vigente) setCargando(false);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [cargar, mensajeError]);
 
   return { datos, cargando, error, recargar };
 }

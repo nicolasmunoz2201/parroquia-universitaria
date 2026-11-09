@@ -8,7 +8,7 @@ import {
 } from "../services/organismo.service";
 import type { Organismo } from "../services/organismo.service";
 import { useOrganismos } from "../hooks/useOrganismos";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import ConfirmarAccion from "./ConfirmarAccion";
 
 const NOMBRE_ORGANISMO_REGEX = /^[\p{L}\p{N} .,-]+$/u;

@@ -24,6 +24,7 @@ const LOTES_CON_STOCK = {
     where: { cantidadDisponible: { gt: 0 } },
     select: { id: true, cantidadDisponible: true, fechaVencimiento: true, createdAt: true },
   },
+  _count: { select: { movimientos: true } },
 } as const;
 
 const INCLUIR_MOVIMIENTO = {
@@ -34,7 +35,7 @@ const INCLUIR_MOVIMIENTO = {
 
 type InsumoConLotes = Prisma.InsumoGetPayload<{ include: typeof LOTES_CON_STOCK }>;
 
-function conStock({ lotes, ...insumo }: InsumoConLotes) {
+function conStock({ lotes, _count, ...insumo }: InsumoConLotes) {
   const stock = redondearCantidad(lotes.reduce((total, lote) => total + lote.cantidadDisponible, 0));
   const vencimientos = lotes
     .map((lote) => lote.fechaVencimiento)
@@ -45,6 +46,7 @@ function conStock({ lotes, ...insumo }: InsumoConLotes) {
     stock,
     estado: calcularEstadoStock(stock, insumo.stockMinimo),
     proximoVencimiento: vencimientos[0] ?? null,
+    tieneMovimientos: _count.movimientos > 0,
   };
 }
 
