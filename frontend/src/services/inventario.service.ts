@@ -16,6 +16,7 @@ export interface Insumo {
   stock: number;
   estado: EstadoStock;
   proximoVencimiento: string | null;
+  tieneMovimientos: boolean;
 }
 
 export interface DatosInsumo {

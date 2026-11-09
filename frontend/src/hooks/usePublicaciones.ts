@@ -1,28 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { listarPublicaciones } from "../services/publicacion.service";
 import type { Publicacion } from "../services/publicacion.service";
+import { useCarga } from "./useCarga";
+
+const SIN_PUBLICACIONES: Publicacion[] = [];
 
 export function usePublicaciones(opciones: { soloOrganismosActivos?: boolean } = {}) {
   const { soloOrganismosActivos } = opciones;
-  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState("");
-
-  const recargar = useCallback(async () => {
-    setCargando(true);
-    setError("");
-    try {
-      setPublicaciones(await listarPublicaciones({ soloOrganismosActivos }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar las publicaciones");
-    } finally {
-      setCargando(false);
-    }
-  }, [soloOrganismosActivos]);
-
-  useEffect(() => {
-    recargar();
-  }, [recargar]);
-
+  const cargar = useCallback(() => listarPublicaciones({ soloOrganismosActivos }), [soloOrganismosActivos]);
+  const { datos: publicaciones, cargando, error, recargar } = useCarga(
+    cargar,
+    SIN_PUBLICACIONES,
+    "Error al cargar las publicaciones"
+  );
   return { publicaciones, cargando, error, recargar };
 }

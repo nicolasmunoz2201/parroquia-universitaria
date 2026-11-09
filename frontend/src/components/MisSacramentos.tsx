@@ -23,7 +23,7 @@ import {
 import type { TipoSacramento } from "../constants/sacramentos";
 import { MAX_TAMANO_DOCUMENTO_MB } from "../constants/archivos";
 import { useCarga } from "../hooks/useCarga";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import { esFechaPasada, formatearFechaHora } from "../utils/fechas";
 import ConfirmarAccion from "./ConfirmarAccion";
 import CampoDocumento from "./CampoDocumento";

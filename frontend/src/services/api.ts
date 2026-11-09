@@ -1,3 +1,5 @@
+import { EVENTO_SESION_EXPIRADA, MENSAJE_SESION_EXPIRADA } from "../constants/autenticacion";
+
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export function getToken(): string | null {
@@ -9,6 +11,15 @@ interface OpcionesPeticion {
   auth?: boolean;
   json?: unknown;
   formData?: FormData;
+}
+
+async function lanzarError(res: Response, mensajeError: string, auth: boolean): Promise<never> {
+  if (auth && res.status === 401) {
+    window.dispatchEvent(new Event(EVENTO_SESION_EXPIRADA));
+    throw new Error(MENSAJE_SESION_EXPIRADA);
+  }
+  const data = await res.json().catch(() => ({}));
+  throw new Error(data.message ?? mensajeError);
 }
 
 export async function peticion<T>(
@@ -27,8 +38,7 @@ export async function peticion<T>(
   });
 
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message ?? mensajeError);
+    await lanzarError(res, mensajeError, auth);
   }
 
   if (res.status === 204) return undefined as T;
@@ -41,8 +51,7 @@ export async function peticionArchivo(ruta: string, mensajeError: string): Promi
   });
 
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message ?? mensajeError);
+    await lanzarError(res, mensajeError, true);
   }
 
   return res.blob();

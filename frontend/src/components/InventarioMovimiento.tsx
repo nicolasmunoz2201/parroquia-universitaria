@@ -19,7 +19,7 @@ import {
 } from "../constants/inventario";
 import type { MotivoMovimiento, TipoRegistro } from "../constants/inventario";
 import { useCarga } from "../hooks/useCarga";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import { hoyParaInput } from "../utils/fechas";
 import { formatearCantidad, pasoCantidad, redondearCantidad } from "../utils/inventario";
 import ConfirmarAccion from "./ConfirmarAccion";

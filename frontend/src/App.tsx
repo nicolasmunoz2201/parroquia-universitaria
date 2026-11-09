@@ -15,6 +15,9 @@ import Sidebar from "./components/Sidebar";
 import type { Vista } from "./components/Sidebar";
 import { logout, obtenerSesion } from "./services/auth.service";
 import type { Usuario } from "./services/auth.service";
+import { getToken } from "./services/api";
+import { useToast } from "./context/toast";
+import { EVENTO_SESION_EXPIRADA, MENSAJE_SESION_EXPIRADA } from "./constants/autenticacion";
 import logoIcono from "./assets/logo-icono.png";
 import "./App.css";
 
@@ -23,6 +26,7 @@ function puedeGestionarPublicaciones(usuario: Usuario | null) {
 }
 
 function App() {
+  const { mostrarToast } = useToast();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [verificando, setVerificando] = useState(true);
   const [vista, setVista] = useState<Vista>("inicio");
@@ -44,6 +48,19 @@ function App() {
 
     verificarSesion();
   }, []);
+
+  useEffect(() => {
+    function cerrarSesionExpirada() {
+      if (!getToken()) return;
+      logout();
+      setUsuario(null);
+      setVista("login");
+      mostrarToast(MENSAJE_SESION_EXPIRADA, "error");
+    }
+
+    window.addEventListener(EVENTO_SESION_EXPIRADA, cerrarSesionExpirada);
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, cerrarSesionExpirada);
+  }, [mostrarToast]);
 
   function handleLogin(usuarioLogueado: Usuario) {
     setUsuario(usuarioLogueado);
