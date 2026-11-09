@@ -21,7 +21,7 @@ import {
 } from "../constants/sacramentos";
 import type { EstadoSolicitud, TipoSacramento } from "../constants/sacramentos";
 import { useCarga } from "../hooks/useCarga";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import {
   esFechaPasada,
   formatearFechaHora,

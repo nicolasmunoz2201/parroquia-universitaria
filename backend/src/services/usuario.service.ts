@@ -20,6 +20,10 @@ export function listarUsuarios() {
   });
 }
 
+export function listarContactosPorRol(rol: Rol) {
+  return prisma.usuario.findMany({ where: { rol }, select: { nombre: true, email: true } });
+}
+
 export async function crearUsuario(data: {
   nombre: string;
   email: string;

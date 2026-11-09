@@ -10,7 +10,7 @@ import type { UsuarioAdmin, Rol } from "../services/usuario.service";
 import type { Organismo } from "../services/organismo.service";
 import { useUsuarios } from "../hooks/useUsuarios";
 import { useOrganismos } from "../hooks/useOrganismos";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import CampoPassword from "./CampoPassword";
 import { LARGO_MINIMO_PASSWORD } from "../constants/autenticacion";
 

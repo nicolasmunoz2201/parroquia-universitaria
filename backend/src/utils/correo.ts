@@ -101,3 +101,25 @@ export async function enviarCorreoEstadoSolicitud(solicitud: {
     `Puedes revisar tus solicitudes en ${process.env.FRONTEND_URL}`,
   ]);
 }
+
+export async function enviarAvisoCancelacion(
+  solicitud: {
+    nombreBeneficiario: string;
+    solicitante: { nombre: string; email: string };
+    horario: { tipo: TipoSacramento; inicio: Date; lugar: string | null };
+  },
+  destinatarios: { nombre: string; email: string }[]
+) {
+  const sacramento = ETIQUETAS_SACRAMENTO[solicitud.horario.tipo];
+  for (const destinatario of destinatarios) {
+    await enviarCorreo(destinatario.email, `Solicitud cancelada: ${sacramento}`, [
+      `Hola ${destinatario.nombre}:`,
+      `${solicitud.solicitante.nombre} (${solicitud.solicitante.email}) canceló su solicitud. El cupo quedó libre para otra persona.`,
+      `Sacramento: ${sacramento}`,
+      `Para: ${solicitud.nombreBeneficiario}`,
+      `Fecha: ${formatearFecha(solicitud.horario.inicio)}`,
+      `Lugar: ${solicitud.horario.lugar ?? "Parroquia Universitaria UdeC"}`,
+      `Puedes revisar las solicitudes en ${process.env.FRONTEND_URL}`,
+    ]);
+  }
+}

@@ -3,10 +3,11 @@ import cors from "cors";
 import path from "path";
 import routes from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { opcionesCors } from "./config/cors";
 
 const app = express();
 
-app.use(cors());
+app.use(cors(opcionesCors));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 

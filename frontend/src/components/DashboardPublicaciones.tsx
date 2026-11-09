@@ -9,7 +9,7 @@ import type { Publicacion } from "../services/publicacion.service";
 import type { Usuario } from "../services/auth.service";
 import { usePublicaciones } from "../hooks/usePublicaciones";
 import { useOrganismos } from "../hooks/useOrganismos";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import ConfirmarAccion from "./ConfirmarAccion";
 import {
   BYTES_POR_MB,

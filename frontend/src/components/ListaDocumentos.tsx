@@ -1,6 +1,6 @@
 import { obtenerDocumento } from "../services/sacramento.service";
 import type { DocumentoSolicitud } from "../services/sacramento.service";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/toast";
 import { abrirArchivo } from "../utils/archivos";
 
 interface Props {
