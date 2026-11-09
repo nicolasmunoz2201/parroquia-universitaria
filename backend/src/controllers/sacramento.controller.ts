@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { EstadoSolicitud, Prisma, TipoSacramento } from "../generated/prisma/client";
+import { EstadoSolicitud, Prisma, Rol, TipoSacramento } from "../generated/prisma/client";
 import * as sacramentoService from "../services/sacramento.service";
+import * as usuarioService from "../services/usuario.service";
 import { DocumentoNuevo, SolicitudInvalidaError } from "../services/sacramento.service";
-import { correoConfigurado, enviarCorreoEstadoSolicitud } from "../utils/correo";
+import { correoConfigurado, enviarAvisoCancelacion, enviarCorreoEstadoSolicitud } from "../utils/correo";
 import { leerTexto } from "../utils/validaciones";
 import { problemaConDocumentos } from "../utils/sacramentos";
 import { eliminarDocumentosGuardados, rutaDocumento } from "../config/documentos";
@@ -36,6 +37,14 @@ function leerTextoOpcional(valor: unknown) {
 function notificar(solicitud: Parameters<typeof enviarCorreoEstadoSolicitud>[0]) {
   if (!correoConfigurado()) return;
   enviarCorreoEstadoSolicitud(solicitud).catch((error) => console.error(error));
+}
+
+async function avisarCancelacion(solicitud: Parameters<typeof enviarAvisoCancelacion>[0]) {
+  if (!correoConfigurado()) return;
+  const secretarias = await usuarioService.listarContactosPorRol(Rol.SECRETARIA);
+  const destinatarios =
+    secretarias.length > 0 ? secretarias : await usuarioService.listarContactosPorRol(Rol.ADMINISTRADOR);
+  await enviarAvisoCancelacion(solicitud, destinatarios);
 }
 
 function leerTiposDocumento(valor: unknown): unknown {
@@ -324,5 +333,7 @@ export async function cancelarSolicitud(req: Request, res: Response) {
     EstadoSolicitud.CANCELADA,
     solicitud.observacion
   );
+  notificar(cancelada);
+  avisarCancelacion(cancelada).catch((error) => console.error(error));
   res.json(cancelada);
 }

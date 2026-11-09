@@ -160,7 +160,7 @@ describe("API de inventario del comedor - Prueba de Integración", () => {
     const alertas = await como(tokenComedor).get("/api/inventario/alertas");
     const arroz = insumos.body.find((insumo: { id: string }) => insumo.id === arrozId);
 
-    expect(arroz).toMatchObject({ stock: 8.5, estado: "BAJO_MINIMO" });
+    expect(arroz).toMatchObject({ stock: 8.5, estado: "BAJO_MINIMO", tieneMovimientos: true });
     expect(alertas.body.bajoMinimo.some((insumo: { id: string }) => insumo.id === arrozId)).toBe(true);
     expect(alertas.body.porVencer.some((lote: { insumoId: string }) => lote.insumoId === arrozId)).toBe(true);
   });
