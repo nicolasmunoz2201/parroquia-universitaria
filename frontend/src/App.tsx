@@ -9,6 +9,9 @@ import RestablecerPassword from "./components/RestablecerPassword";
 import MisSacramentos from "./components/MisSacramentos";
 import DashboardAgendamientos from "./components/DashboardAgendamientos";
 import DashboardInventario from "./components/DashboardInventario";
+import Actividades from "./components/Actividades";
+import DashboardActividades from "./components/DashboardActividades";
+import { ROLES_GESTION_ACTIVIDADES } from "./constants/actividades";
 import { ROLES_GESTION_SACRAMENTOS } from "./constants/sacramentos";
 import { ROLES_INVENTARIO } from "./constants/inventario";
 import Sidebar from "./components/Sidebar";
@@ -122,6 +125,10 @@ function App() {
         ) : (
           <>
             {vista === "inicio" && <PaginaInicial />}
+            {vista === "actividades" && <Actividades usuario={usuario} onIrALogin={() => navegar("login")} />}
+            {vista === "gestion-actividades" && usuario && ROLES_GESTION_ACTIVIDADES.includes(usuario.rol) && (
+              <DashboardActividades usuario={usuario} />
+            )}
             {vista === "login" && <Login onLogin={handleLogin} />}
             {vista === "perfil" && usuario && <Dashboard usuario={usuario} />}
             {vista === "gestion" && usuario && puedeGestionarPublicaciones(usuario) && (
