@@ -1,9 +1,12 @@
 import type { Usuario } from "../services/auth.service";
 import { ROLES_GESTION_SACRAMENTOS } from "../constants/sacramentos";
 import { ROLES_INVENTARIO } from "../constants/inventario";
+import { ROLES_GESTION_ACTIVIDADES } from "../constants/actividades";
 
 export type Vista =
   | "inicio"
+  | "actividades"
+  | "gestion-actividades"
   | "login"
   | "perfil"
   | "gestion"
@@ -35,6 +38,7 @@ export default function Sidebar({
   const esAdmin = usuario?.rol === "ADMINISTRADOR";
   const gestionaSacramentos = !!usuario && ROLES_GESTION_SACRAMENTOS.includes(usuario.rol);
   const gestionaInventario = !!usuario && ROLES_INVENTARIO.includes(usuario.rol);
+  const gestionaActividades = !!usuario && ROLES_GESTION_ACTIVIDADES.includes(usuario.rol);
   function navegar(vista: Vista) {
     onNavegar(vista);
     onCerrar();
@@ -58,6 +62,12 @@ export default function Sidebar({
           >
             Inicio
           </button>
+          <button
+            className={`sidebar-link ${vistaActual === "actividades" ? "activo" : ""}`}
+            onClick={() => navegar("actividades")}
+          >
+            Actividades
+          </button>
           {usuario && (
             <button
               className={`sidebar-link ${vistaActual === "perfil" ? "activo" : ""}`}
@@ -80,6 +90,14 @@ export default function Sidebar({
               onClick={() => navegar("agendamientos")}
             >
               Agendamientos
+            </button>
+          )}
+          {gestionaActividades && (
+            <button
+              className={`sidebar-link ${vistaActual === "gestion-actividades" ? "activo" : ""}`}
+              onClick={() => navegar("gestion-actividades")}
+            >
+              Gestionar actividades
             </button>
           )}
           {gestionaInventario && (
