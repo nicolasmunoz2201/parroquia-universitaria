@@ -98,7 +98,80 @@ export async function enviarCorreoEstadoSolicitud(solicitud: {
     `Para: ${solicitud.nombreBeneficiario}`,
     `Fecha: ${formatearFecha(solicitud.horario.inicio)}`,
     `Lugar: ${solicitud.horario.lugar ?? "Parroquia Universitaria UdeC"}`,
-    `Puedes revisar tus solicitudes en ${process.env.FRONTEND_URL}`,
+    "Puedes revisar tus solicitudes en la plataforma de la parroquia, en la sección Agendar sacramentos.",
+  ]);
+}
+
+export type EventoInscripcion =
+  | "RECIBIDA"
+  | "EN_ESPERA"
+  | "ACEPTADA"
+  | "RECHAZADA"
+  | "PROMOVIDA"
+  | "RECORDATORIO"
+  | "LIBERADA"
+  | "NO_APROBADA"
+  | "ACTIVIDAD_MODIFICADA"
+  | "ACTIVIDAD_CANCELADA";
+
+interface DatosCorreoInscripcion {
+  motivoRechazo: string | null;
+  usuario: { nombre: string; email: string };
+  actividad: { titulo: string; inicio: Date; lugar: string | null; organismo: { nombre: string } };
+}
+
+const ASUNTO_INSCRIPCION: Record<EventoInscripcion, string> = {
+  RECIBIDA: "Recibimos tu inscripción",
+  EN_ESPERA: "Quedaste en lista de espera",
+  ACEPTADA: "Tu inscripción fue aceptada",
+  RECHAZADA: "Tu inscripción fue rechazada",
+  PROMOVIDA: "Se liberó un cupo para ti",
+  RECORDATORIO: "Confirma tu asistencia",
+  LIBERADA: "Perdiste tu cupo",
+  NO_APROBADA: "Tu inscripción no alcanzó a ser aprobada",
+  ACTIVIDAD_MODIFICADA: "La actividad cambió",
+  ACTIVIDAD_CANCELADA: "La actividad fue cancelada",
+};
+
+function detalleInscripcion(evento: EventoInscripcion, datos: DatosCorreoInscripcion, cierre: string, apertura: string) {
+  switch (evento) {
+    case "RECIBIDA":
+      return "Recibimos tu inscripción. El encargado la revisará y te avisaremos por este medio.";
+    case "EN_ESPERA":
+      return "La actividad no tiene cupos por ahora, así que quedaste en lista de espera. Si se libera un cupo, te avisaremos.";
+    case "ACEPTADA":
+      return `Tu inscripción fue aceptada. Recuerda confirmar tu asistencia en la plataforma entre el ${apertura} y el ${cierre}; si no confirmas, el cupo pasará a otra persona.`;
+    case "RECHAZADA":
+      return `Tu inscripción fue rechazada. Motivo: ${datos.motivoRechazo ?? "no se indicó"}.`;
+    case "PROMOVIDA":
+      return "Se liberó un cupo y subiste desde la lista de espera. Tu inscripción quedó pendiente de aprobación.";
+    case "RECORDATORIO":
+      return `Confirma tu asistencia en la plataforma antes del ${cierre}. Si no puedes ir, usa "No podré asistir" para dejar el cupo a otra persona.`;
+    case "LIBERADA":
+      return "No se confirmó tu asistencia a tiempo, por lo que el cupo quedó libre.";
+    case "NO_APROBADA":
+      return "Las inscripciones cerraron antes de que el encargado revisara tu solicitud. Lamentamos las molestias.";
+    case "ACTIVIDAD_MODIFICADA":
+      return `La fecha o el lugar de la actividad cambiaron. Revisa los datos nuevos abajo. Si ya estabas aceptado, deberás confirmar tu asistencia entre el ${apertura} y el ${cierre}.`;
+    case "ACTIVIDAD_CANCELADA":
+      return "Lamentamos informarte que la actividad fue cancelada.";
+  }
+}
+
+export async function enviarCorreoInscripcion(
+  evento: EventoInscripcion,
+  datos: DatosCorreoInscripcion,
+  plazos: { apertura: Date; cierre: Date }
+) {
+  const { actividad } = datos;
+  await enviarCorreo(datos.usuario.email, `${ASUNTO_INSCRIPCION[evento]}: ${actividad.titulo}`, [
+    `Hola ${datos.usuario.nombre}:`,
+    detalleInscripcion(evento, datos, formatearFecha(plazos.cierre), formatearFecha(plazos.apertura)),
+    `Actividad: ${actividad.titulo}`,
+    `Organismo: ${actividad.organismo.nombre}`,
+    `Fecha: ${formatearFecha(actividad.inicio)}`,
+    `Lugar: ${actividad.lugar ?? "Parroquia Universitaria UdeC"}`,
+    "Puedes revisar tus inscripciones en la plataforma de la parroquia, en la sección Actividades.",
   ]);
 }
 
@@ -119,7 +192,7 @@ export async function enviarAvisoCancelacion(
       `Para: ${solicitud.nombreBeneficiario}`,
       `Fecha: ${formatearFecha(solicitud.horario.inicio)}`,
       `Lugar: ${solicitud.horario.lugar ?? "Parroquia Universitaria UdeC"}`,
-      `Puedes revisar las solicitudes en ${process.env.FRONTEND_URL}`,
+      "Puedes revisar las solicitudes en la plataforma de la parroquia, en la sección Agendamientos.",
     ]);
   }
 }

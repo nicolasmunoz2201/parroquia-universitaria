@@ -32,6 +32,16 @@ enum EstadoSolicitud {
   REALIZADA
 }
 
+enum EstadoInscripcion {
+  EN_ESPERA
+  PENDIENTE
+  ACEPTADA
+  CONFIRMADA
+  RECHAZADA
+  CANCELADA
+  LIBERADA
+}
+
 enum UnidadMedida {
   KILOGRAMO
   LITRO
@@ -54,21 +64,23 @@ enum MotivoMovimiento {
 }
 
 model Usuario {
-  id            String          @id @default(cuid())
-  nombre        String
-  email         String          @unique
-  password      String
-  tokenVersion  Int             @default(0)
-  recuperacionHash   String?   @unique
-  recuperacionExpira DateTime?
-  rol           Rol
-  organismo     Organismo?      @relation(fields: [organismoId], references: [id])
-  organismoId   String?
-  createdAt     DateTime        @default(now())
-  publicaciones Publicacion[]
-  hitos         HitoHistorico[]
+  id                    String                 @id @default(cuid())
+  nombre                String
+  email                 String                 @unique
+  password              String
+  tokenVersion          Int                    @default(0)
+  recuperacionHash      String?                @unique
+  recuperacionExpira    DateTime?
+  rol                   Rol
+  organismo             Organismo?             @relation(fields: [organismoId], references: [id])
+  organismoId           String?
+  createdAt             DateTime               @default(now())
+  publicaciones         Publicacion[]
+  hitos                 HitoHistorico[]
   solicitudesSacramento SolicitudSacramento[]
   movimientosInventario MovimientoInventario[]
+  actividadesCreadas    Actividad[]
+  inscripciones         Inscripcion[]
 }
 
 model Organismo {
@@ -79,13 +91,50 @@ model Organismo {
   createdAt     DateTime      @default(now())
   publicaciones Publicacion[]
   encargados    Usuario[]
+  actividades   Actividad[]
+}
+
+model Actividad {
+  id            String        @id @default(cuid())
+  titulo        String
+  descripcion   String
+  inicio        DateTime
+  lugar         String?
+  cupos         Int
+  cancelada     Boolean       @default(false)
+  organismo     Organismo     @relation(fields: [organismoId], references: [id])
+  organismoId   String
+  creador       Usuario       @relation(fields: [creadorId], references: [id])
+  creadorId     String
+  inscripciones Inscripcion[]
+  createdAt     DateTime      @default(now())
+
+  @@index([inicio])
+}
+
+model Inscripcion {
+  id                  String            @id @default(cuid())
+  estado              EstadoInscripcion
+  motivoRechazo       String?
+  asistio             Boolean?
+  recordatorioEnviado Boolean           @default(false)
+  fechaSolicitud      DateTime          @default(now())
+  actividad           Actividad         @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+  actividadId         String
+  usuario             Usuario           @relation(fields: [usuarioId], references: [id])
+  usuarioId           String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([actividadId, usuarioId])
+  @@index([actividadId, estado])
 }
 
 model Publicacion {
   id          String    @id @default(cuid())
   titulo      String
   contenido   String
-  imagenes    String[] @default([])
+  imagenes    String[]  @default([])
   autor       Usuario   @relation(fields: [autorId], references: [id])
   autorId     String
   organismo   Organismo @relation(fields: [organismoId], references: [id])
