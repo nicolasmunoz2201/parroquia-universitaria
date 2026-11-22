@@ -3,7 +3,6 @@ import { Prisma, Rol } from "../generated/prisma/client";
 import * as usuarioService from "../services/usuario.service";
 import * as organismoService from "../services/organismo.service";
 import { leerEmail, leerTexto, validarDatosCuenta } from "../utils/validaciones";
-import { correoConfigurado, enviarCorreoRecuperacion } from "../utils/correo";
 
 const ROLES_ASIGNABLES: Rol[] = Object.values(Rol).filter((rol) => rol !== Rol.ADMINISTRADOR);
 
@@ -91,25 +90,4 @@ export async function actualizarRol(req: Request, res: Response) {
     organismoId: rol === Rol.ENCARGADO_ORGANISMO ? organismoId : null,
   });
   res.json(usuario);
-}
-
-export async function enviarRecuperacion(req: Request, res: Response) {
-  if (!correoConfigurado()) {
-    res.status(503).json({ message: "El envio de correos no esta configurado en el servidor" });
-    return;
-  }
-
-  const existente = await obtenerUsuarioEditable(req, res);
-  if (!existente) return;
-
-  const codigo = await usuarioService.crearCodigoRecuperacion(existente.id);
-  try {
-    await enviarCorreoRecuperacion(existente, codigo);
-  } catch (error) {
-    console.error(error);
-    await usuarioService.anularCodigoRecuperacion(existente.id);
-    res.status(502).json({ message: "No se pudo enviar el correo, intenta de nuevo mas tarde" });
-    return;
-  }
-  res.status(204).send();
 }

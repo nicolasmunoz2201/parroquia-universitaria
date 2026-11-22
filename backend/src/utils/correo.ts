@@ -45,15 +45,24 @@ export async function enviarCorreoRecuperacion(destino: { nombre: string; email:
     subject: "Recupera tu contraseña",
     text:
       `Hola ${destino.nombre}:\n\n` +
-      `El administrador de la Parroquia Universitaria UdeC te envió este enlace para crear una nueva contraseña:\n\n` +
+      `Recibimos una solicitud para crear una nueva contraseña en la plataforma de la Parroquia Universitaria UdeC. Usa este enlace:\n\n` +
       `${enlace}\n\n` +
       `El enlace sirve una sola vez y vence en ${validez}. Si no pediste este cambio, puedes ignorar este correo.`,
     html:
       `<p>Hola ${escaparHtml(destino.nombre)}:</p>` +
-      `<p>El administrador de la Parroquia Universitaria UdeC te envió este enlace para crear una nueva contraseña:</p>` +
+      `<p>Recibimos una solicitud para crear una nueva contraseña en la plataforma de la Parroquia Universitaria UdeC. Usa este enlace:</p>` +
       `<p><a href="${enlace}">Crear nueva contraseña</a></p>` +
       `<p>El enlace sirve una sola vez y vence en ${validez}. Si no pediste este cambio, puedes ignorar este correo.</p>`,
   });
+}
+
+export async function enviarAvisoCambioPassword(destino: { nombre: string; email: string }, fecha: Date) {
+  await enviarCorreo(destino.email, "Tu contraseña fue cambiada", [
+    `Hola ${destino.nombre}:`,
+    `La contraseña de tu cuenta en la plataforma de la Parroquia Universitaria UdeC se cambió el ${formatearFecha(fecha)}.`,
+    "Si fuiste tú, no tienes que hacer nada. Por seguridad, se cerró la sesión en tus otros dispositivos.",
+    'Si no fuiste tú, entra a la plataforma y usa la opción "¿Olvidaste tu contraseña?" para crear una nueva de inmediato.',
+  ]);
 }
 
 export function formatearFecha(fecha: Date) {

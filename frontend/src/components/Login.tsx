@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { login, registrar } from "../services/auth.service";
+import { login, registrar, solicitarRecuperacion } from "../services/auth.service";
 import type { Usuario } from "../services/auth.service";
 import CampoPassword from "./CampoPassword";
 import logoParroquia from "../assets/logo-parroquia.jpg";
@@ -10,8 +10,79 @@ interface Props {
   onLogin: (usuario: Usuario) => void;
 }
 
+function RecuperarPassword({ emailInicial, onVolver }: { emailInicial: string; onVolver: () => void }) {
+  const [email, setEmail] = useState(emailInicial);
+  const [error, setError] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setEnviando(true);
+    try {
+      await solicitarRecuperacion(email.trim());
+      setEnviado(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo enviar el enlace de recuperación");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  if (enviado) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <h1>Revisa tu correo</h1>
+          <p className="login-subtitle">
+            Si {email.trim()} está registrado, te enviamos un enlace para crear una nueva contraseña. Sirve una sola
+            vez y vence en 1 hora. Si no lo ves, revisa la carpeta de spam.
+          </p>
+          <button type="button" className="boton boton-principal boton-formulario" onClick={onVolver}>
+            Volver a iniciar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="login-page">
+      <form className="login-card" onSubmit={handleSubmit}>
+        <img src={logoParroquia} alt="Parroquia Universitaria Concepción" className="login-logo" />
+        <h1>¿Olvidaste tu contraseña?</h1>
+        <p className="login-subtitle">Escribe tu correo y te enviaremos un enlace para crear una nueva.</p>
+
+        <label htmlFor="emailRecuperar">Correo electrónico</label>
+        <input
+          id="emailRecuperar"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="nombre@correo.cl"
+          autoComplete="email"
+          required
+        />
+
+        {error && <p className="login-error">{error}</p>}
+
+        <button type="submit" className="boton boton-principal boton-formulario" disabled={enviando}>
+          {enviando ? "Enviando..." : "Enviar enlace"}
+        </button>
+
+        <p className="login-cambio">
+          <button type="button" className="boton-enlace" onClick={onVolver}>
+            Volver a iniciar sesión
+          </button>
+        </p>
+      </form>
+    </div>
+  );
+}
+
 export default function Login({ onLogin }: Props) {
-  const [modo, setModo] = useState<"login" | "registro">("login");
+  const [modo, setModo] = useState<"login" | "registro" | "recuperar">("login");
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +118,10 @@ export default function Login({ onLogin }: Props) {
     } finally {
       setCargando(false);
     }
+  }
+
+  if (modo === "recuperar") {
+    return <RecuperarPassword emailInicial={email} onVolver={() => setModo("login")} />;
   }
 
   return (
@@ -93,6 +168,19 @@ export default function Login({ onLogin }: Props) {
           }
           required
         />
+
+        {!esRegistro && (
+          <button
+            type="button"
+            className="boton-enlace login-olvide"
+            onClick={() => {
+              setError("");
+              setModo("recuperar");
+            }}
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
+        )}
 
         {esRegistro && (
           <>

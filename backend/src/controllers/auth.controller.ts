@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { Prisma } from "../generated/prisma/client";
 import * as authService from "../services/auth.service";
 import * as usuarioService from "../services/usuario.service";
-import { leerEmail, leerTexto, validarDatosCuenta, validarPassword } from "../utils/validaciones";
+import { leerEmail, leerTexto, validarDatosCuenta, validarEmail, validarPassword } from "../utils/validaciones";
+import { correoConfigurado, enviarAvisoCambioPassword, enviarCorreoRecuperacion } from "../utils/correo";
 
 export async function login(req: Request, res: Response) {
   const email = leerEmail(req.body?.email);
@@ -72,7 +73,37 @@ export async function cambiarPassword(req: Request, res: Response) {
     return;
   }
 
+  if (correoConfigurado()) {
+    enviarAvisoCambioPassword(resultado.usuario, new Date()).catch((errorCorreo) => console.error(errorCorreo));
+  }
   res.json(resultado);
+}
+
+export async function solicitarRecuperacion(req: Request, res: Response) {
+  const email = leerEmail(req.body?.email);
+  const error = validarEmail(email);
+  if (error) {
+    res.status(400).json({ message: error });
+    return;
+  }
+  if (!correoConfigurado()) {
+    res.status(503).json({ message: "El envio de correos no esta configurado en el servidor" });
+    return;
+  }
+
+  const usuario = await usuarioService.obtenerUsuarioPorEmail(email!);
+  if (usuario) {
+    const codigo = await usuarioService.crearCodigoRecuperacion(usuario.id);
+    try {
+      await enviarCorreoRecuperacion(usuario, codigo);
+    } catch (errorCorreo) {
+      console.error(errorCorreo);
+      await usuarioService.anularCodigoRecuperacion(usuario.id);
+      res.status(502).json({ message: "No se pudo enviar el correo, intenta de nuevo mas tarde" });
+      return;
+    }
+  }
+  res.status(204).send();
 }
 
 export async function restablecerPassword(req: Request, res: Response) {
@@ -92,7 +123,7 @@ export async function restablecerPassword(req: Request, res: Response) {
   const restablecida = await usuarioService.restablecerPassword(codigo, password);
   if (!restablecida) {
     res.status(400).json({
-      message: "El enlace no es valido o ya vencio. Pide al administrador un correo nuevo.",
+      message: "El enlace no es valido o ya vencio. Pide uno nuevo con la opcion ¿Olvidaste tu contraseña?",
     });
     return;
   }

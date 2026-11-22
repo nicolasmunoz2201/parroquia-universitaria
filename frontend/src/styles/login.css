@@ -56,6 +56,12 @@
   border-color: var(--accent);
 }
 
+.login-olvide {
+  align-self: flex-end;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
 .login-cambio {
   margin: 16px 0 0;
   text-align: center;

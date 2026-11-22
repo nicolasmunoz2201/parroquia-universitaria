@@ -46,6 +46,13 @@ export async function cambiarMiPassword(passwordActual: string, passwordNueva: s
   return guardarSesion(data);
 }
 
+export function solicitarRecuperacion(email: string): Promise<void> {
+  return peticion("/api/auth/recuperar", "No se pudo enviar el enlace de recuperación", {
+    method: "POST",
+    json: { email },
+  });
+}
+
 export function restablecerPassword(codigo: string, password: string): Promise<void> {
   return peticion("/api/auth/restablecer", "No se pudo cambiar la contraseña", {
     method: "POST",
