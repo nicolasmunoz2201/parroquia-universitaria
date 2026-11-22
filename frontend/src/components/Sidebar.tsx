@@ -7,6 +7,8 @@ export type Vista =
   | "inicio"
   | "actividades"
   | "gestion-actividades"
+  | "memoria"
+  | "gestion-memoria"
   | "login"
   | "perfil"
   | "gestion"
@@ -68,6 +70,12 @@ export default function Sidebar({
           >
             Actividades
           </button>
+          <button
+            className={`sidebar-link ${vistaActual === "memoria" ? "activo" : ""}`}
+            onClick={() => navegar("memoria")}
+          >
+            Memoria histórica
+          </button>
           {usuario && (
             <button
               className={`sidebar-link ${vistaActual === "perfil" ? "activo" : ""}`}
@@ -114,6 +122,14 @@ export default function Sidebar({
               onClick={() => navegar("gestion")}
             >
               Gestionar publicaciones
+            </button>
+          )}
+          {esAdmin && (
+            <button
+              className={`sidebar-link ${vistaActual === "gestion-memoria" ? "activo" : ""}`}
+              onClick={() => navegar("gestion-memoria")}
+            >
+              Gestionar memoria
             </button>
           )}
           {esAdmin && (

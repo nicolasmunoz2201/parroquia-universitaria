@@ -11,6 +11,8 @@ import DashboardAgendamientos from "./components/DashboardAgendamientos";
 import DashboardInventario from "./components/DashboardInventario";
 import Actividades from "./components/Actividades";
 import DashboardActividades from "./components/DashboardActividades";
+import MemoriaHistorica from "./components/MemoriaHistorica";
+import DashboardMemoria from "./components/DashboardMemoria";
 import { ROLES_GESTION_ACTIVIDADES } from "./constants/actividades";
 import { ROLES_GESTION_SACRAMENTOS } from "./constants/sacramentos";
 import { ROLES_INVENTARIO } from "./constants/inventario";
@@ -129,6 +131,8 @@ function App() {
             {vista === "gestion-actividades" && usuario && ROLES_GESTION_ACTIVIDADES.includes(usuario.rol) && (
               <DashboardActividades usuario={usuario} />
             )}
+            {vista === "memoria" && <MemoriaHistorica />}
+            {vista === "gestion-memoria" && usuario?.rol === "ADMINISTRADOR" && <DashboardMemoria />}
             {vista === "login" && <Login onLogin={handleLogin} />}
             {vista === "perfil" && usuario && <Dashboard usuario={usuario} />}
             {vista === "gestion" && usuario && puedeGestionarPublicaciones(usuario) && (
