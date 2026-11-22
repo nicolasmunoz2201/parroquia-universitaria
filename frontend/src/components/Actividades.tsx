@@ -69,12 +69,22 @@ export default function Actividades({ usuario, onIrALogin }: Props) {
     "No se pudieron cargar tus inscripciones"
   );
 
+  const [pestana, setPestana] = useState<"disponibles" | "inscritas">("disponibles");
   const [organismo, setOrganismo] = useState("");
   const [enviando, setEnviando] = useState("");
   const [porCancelar, setPorCancelar] = useState<MiInscripcion | null>(null);
 
-  const organismos = [...new Map(actividades.map((a) => [a.organismo.id, a.organismo.nombre])).entries()];
-  const visibles = actividades.filter((actividad) => !organismo || actividad.organismo.id === organismo);
+  const inscripcionPorActividad = new Map(misInscripciones.map((inscripcion) => [inscripcion.actividad.id, inscripcion]));
+  const disponibles = actividades.filter((actividad) => {
+    const mia = inscripcionPorActividad.get(actividad.id);
+    return !mia || ESTADOS_REINSCRIBIBLES.includes(mia.estado);
+  });
+  const idsDisponibles = new Set(disponibles.map((actividad) => actividad.id));
+  const inscritas = misInscripciones.filter((inscripcion) => !idsDisponibles.has(inscripcion.actividad.id));
+
+  const organismos = [...new Map(disponibles.map((a) => [a.organismo.id, a.organismo.nombre])).entries()];
+  const visibles = disponibles.filter((actividad) => !organismo || actividad.organismo.id === organismo);
+  const verInscritas = Boolean(usuario) && pestana === "inscritas";
 
   async function recargarTodo() {
     await Promise.all([recargar(), recargarMias()]);
@@ -90,6 +100,7 @@ export default function Actividades({ usuario, onIrALogin }: Props) {
           : "Inscripción enviada. El encargado la revisará y te avisaremos por correo."
       );
       await recargarTodo();
+      setPestana("inscritas");
     } catch (err) {
       mostrarToast(err instanceof Error ? err.message : "No se pudo completar la inscripción", "error");
     } finally {
@@ -121,10 +132,6 @@ export default function Actividades({ usuario, onIrALogin }: Props) {
   }
 
   function accionActividad(actividad: Actividad) {
-    const mia = misInscripciones.find((inscripcion) => inscripcion.actividad.id === actividad.id);
-    if (mia && !ESTADOS_REINSCRIBIBLES.includes(mia.estado)) {
-      return <span className={`estado-solicitud ${CLASE_INSCRIPCION[mia.estado]}`}>{ETIQUETAS_INSCRIPCION[mia.estado]}</span>;
-    }
     if (!inscripcionesAbiertas(actividad.inicio)) {
       return <span className="estado-solicitud estado-cancelada">Inscripciones cerradas</span>;
     }
@@ -158,7 +165,32 @@ export default function Actividades({ usuario, onIrALogin }: Props) {
         Inscríbete en las actividades de los organismos de la parroquia. Te avisaremos por correo cada paso.
       </p>
 
-      {organismos.length > 1 && (
+      {usuario && (
+        <div className="pestanas" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={pestana === "disponibles"}
+            className={`pestana ${pestana === "disponibles" ? "pestana-activa" : ""}`}
+            onClick={() => setPestana("disponibles")}
+          >
+            <span className="pestana-titulo">Disponibles ({disponibles.length})</span>
+            <span className="pestana-detalle">Actividades en las que puedes inscribirte</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={pestana === "inscritas"}
+            className={`pestana ${pestana === "inscritas" ? "pestana-activa" : ""}`}
+            onClick={() => setPestana("inscritas")}
+          >
+            <span className="pestana-titulo">Inscritas ({inscritas.length})</span>
+            <span className="pestana-detalle">Tus inscripciones y en qué estado van</span>
+          </button>
+        </div>
+      )}
+
+      {!verInscritas && organismos.length > 1 && (
         <div className="filtro-solicitudes">
           <label htmlFor="filtroOrganismoActividad">Organismo</label>
           <select id="filtroOrganismoActividad" value={organismo} onChange={(e) => setOrganismo(e.target.value)}>
@@ -173,80 +205,83 @@ export default function Actividades({ usuario, onIrALogin }: Props) {
       )}
 
       {error && <p className="login-error">{error}</p>}
-      <ul className="lista-actividades">
-        {!cargando &&
-          visibles.map((actividad) => (
-            <li key={actividad.id} className="tarjeta-actividad">
-              <span className="actividad-organismo">{actividad.organismo.nombre}</span>
-              <h2>{actividad.titulo}</h2>
-              <p className="actividad-fecha">{formatearFechaHora(actividad.inicio)}</p>
-              <p className="actividad-detalle">{actividad.lugar ?? "Parroquia Universitaria"}</p>
-              <p className="actividad-descripcion">{actividad.descripcion}</p>
-              <div className="actividad-pie">
-                <span className={`actividad-cupos ${actividad.cuposDisponibles === 0 ? "actividad-llena" : ""}`}>
-                  {textoCupos(actividad.cuposDisponibles)}
-                </span>
-                {accionActividad(actividad)}
-              </div>
+      {!verInscritas && (
+        <ul className="lista-actividades">
+          {!cargando &&
+            visibles.map((actividad) => (
+              <li key={actividad.id} className="tarjeta-actividad">
+                <span className="actividad-organismo">{actividad.organismo.nombre}</span>
+                <h2>{actividad.titulo}</h2>
+                <p className="actividad-fecha">{formatearFechaHora(actividad.inicio)}</p>
+                <p className="actividad-detalle">{actividad.lugar ?? "Parroquia Universitaria"}</p>
+                <p className="actividad-descripcion">{actividad.descripcion}</p>
+                <div className="actividad-pie">
+                  <span className={`actividad-cupos ${actividad.cuposDisponibles === 0 ? "actividad-llena" : ""}`}>
+                    {textoCupos(actividad.cuposDisponibles)}
+                  </span>
+                  {accionActividad(actividad)}
+                </div>
+              </li>
+            ))}
+          {!cargando && visibles.length === 0 && (
+            <li className="aviso-vacio">
+              {usuario && actividades.length > 0
+                ? "Ya estás inscrito en todas las actividades próximas. Revisa la pestaña Inscritas."
+                : "No hay actividades próximas por ahora. Vuelve a revisar pronto."}
             </li>
-          ))}
-        {!cargando && visibles.length === 0 && (
-          <li className="aviso-vacio">No hay actividades próximas por ahora. Vuelve a revisar pronto.</li>
-        )}
-      </ul>
+          )}
+        </ul>
+      )}
 
-      {usuario && (
-        <>
-          <h2 className="titulo-seccion">Mis inscripciones</h2>
-          <ul className="publicaciones-lista">
-            {misInscripciones.map((inscripcion) => {
-              const pasada = esFechaPasada(inscripcion.actividad.inicio);
-              const vigente = ESTADOS_INSCRIPCION_VIGENTE.includes(inscripcion.estado);
-              return (
-                <li key={inscripcion.id} className="fila-solicitud">
-                  <div className="fila-solicitud-info">
-                    <strong>
-                      {inscripcion.actividad.titulo} · {inscripcion.actividad.organismo.nombre}
-                    </strong>
-                    <span>{formatearFechaHora(inscripcion.actividad.inicio)}</span>
-                    {inscripcion.actividad.cancelada && (
-                      <span className="fila-solicitud-observacion">La actividad fue cancelada</span>
-                    )}
-                    {inscripcion.motivoRechazo && inscripcion.estado === "RECHAZADA" && (
-                      <span className="fila-solicitud-observacion">Motivo: {inscripcion.motivoRechazo}</span>
-                    )}
-                    {!pasada && !inscripcion.actividad.cancelada && <DetalleConfirmacion inscripcion={inscripcion} />}
-                    {inscripcion.asistio !== null && <span>{inscripcion.asistio ? "Asististe ✓" : "No se registró tu asistencia"}</span>}
-                  </div>
-                  <div className="fila-solicitud-acciones">
-                    {inscripcion.actividad.cancelada ? (
-                      <span className="estado-solicitud estado-rechazada">Actividad cancelada</span>
-                    ) : (
-                      <span className={`estado-solicitud ${CLASE_INSCRIPCION[inscripcion.estado]}`}>
-                        {ETIQUETAS_INSCRIPCION[inscripcion.estado]}
-                      </span>
-                    )}
-                    {inscripcion.estado === "ACEPTADA" && !inscripcion.actividad.cancelada && puedeConfirmarAhora(inscripcion.actividad.inicio) && (
-                      <button type="button" className="boton boton-principal boton-chico" onClick={() => handleConfirmar(inscripcion)}>
-                        Confirmar asistencia
-                      </button>
-                    )}
-                    {vigente && !pasada && !inscripcion.actividad.cancelada && (
-                      <button
-                        type="button"
-                        className="boton boton-peligro-borde boton-chico"
-                        onClick={() => setPorCancelar(inscripcion)}
-                      >
-                        {inscripcion.estado === "EN_ESPERA" ? "Salir de la lista de espera" : "No podré asistir"}
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-            {misInscripciones.length === 0 && <li>Todavía no te has inscrito en ninguna actividad.</li>}
-          </ul>
-        </>
+      {verInscritas && (
+        <ul className="publicaciones-lista">
+          {inscritas.map((inscripcion) => {
+            const pasada = esFechaPasada(inscripcion.actividad.inicio);
+            const vigente = ESTADOS_INSCRIPCION_VIGENTE.includes(inscripcion.estado);
+            return (
+              <li key={inscripcion.id} className="fila-solicitud">
+                <div className="fila-solicitud-info">
+                  <strong>
+                    {inscripcion.actividad.titulo} · {inscripcion.actividad.organismo.nombre}
+                  </strong>
+                  <span>{formatearFechaHora(inscripcion.actividad.inicio)}</span>
+                  {inscripcion.actividad.cancelada && (
+                    <span className="fila-solicitud-observacion">La actividad fue cancelada</span>
+                  )}
+                  {inscripcion.motivoRechazo && inscripcion.estado === "RECHAZADA" && (
+                    <span className="fila-solicitud-observacion">Motivo: {inscripcion.motivoRechazo}</span>
+                  )}
+                  {!pasada && !inscripcion.actividad.cancelada && <DetalleConfirmacion inscripcion={inscripcion} />}
+                  {inscripcion.asistio !== null && <span>{inscripcion.asistio ? "Asististe ✓" : "No se registró tu asistencia"}</span>}
+                </div>
+                <div className="fila-solicitud-acciones">
+                  {inscripcion.actividad.cancelada ? (
+                    <span className="estado-solicitud estado-rechazada">Actividad cancelada</span>
+                  ) : (
+                    <span className={`estado-solicitud ${CLASE_INSCRIPCION[inscripcion.estado]}`}>
+                      {ETIQUETAS_INSCRIPCION[inscripcion.estado]}
+                    </span>
+                  )}
+                  {inscripcion.estado === "ACEPTADA" && !inscripcion.actividad.cancelada && puedeConfirmarAhora(inscripcion.actividad.inicio) && (
+                    <button type="button" className="boton boton-principal boton-chico" onClick={() => handleConfirmar(inscripcion)}>
+                      Confirmar asistencia
+                    </button>
+                  )}
+                  {vigente && !pasada && !inscripcion.actividad.cancelada && (
+                    <button
+                      type="button"
+                      className="boton boton-peligro-borde boton-chico"
+                      onClick={() => setPorCancelar(inscripcion)}
+                    >
+                      {inscripcion.estado === "EN_ESPERA" ? "Salir de la lista de espera" : "No podré asistir"}
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+          {inscritas.length === 0 && <li>Todavía no te has inscrito en ninguna actividad.</li>}
+        </ul>
       )}
 
       {porCancelar && (

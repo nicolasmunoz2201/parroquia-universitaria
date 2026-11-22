@@ -69,7 +69,7 @@ describe("Flujo E2E: un feligrés se inscribe en una actividad y avisa que no po
     });
   });
 
-  it("inicia sesión, se inscribe, ve su inscripción pendiente y libera el cupo", () => {
+  it("inicia sesión, se inscribe, ve su inscripción pendiente en Inscritas y libera el cupo", () => {
     cy.env(["FELIGRES_EMAIL", "FELIGRES_PASSWORD"]).then(({ FELIGRES_EMAIL, FELIGRES_PASSWORD }) => {
       cy.visit("/");
       cy.get('[aria-label="Abrir menu"]').click();
@@ -88,13 +88,20 @@ describe("Flujo E2E: un feligrés se inscribe en una actividad y avisa que no po
       cy.contains("button", "Inscribirme").click();
     });
     cy.contains("Inscripción enviada").should("be.visible");
-    cy.contains("li.tarjeta-actividad", TITULO).should("contain", "Pendiente de aprobación");
+    cy.contains('[role="tab"]', "Inscritas").should("have.attr", "aria-selected", "true");
+    cy.contains("li.tarjeta-actividad", TITULO).should("not.exist");
     cy.contains("li.fila-solicitud", TITULO).should("contain", "Pendiente de aprobación");
+
+    cy.contains('[role="tab"]', "Disponibles").click();
+    cy.contains("li.tarjeta-actividad", TITULO).should("not.exist");
+    cy.contains('[role="tab"]', "Inscritas").click();
 
     cy.contains("li.fila-solicitud", TITULO).contains("button", "No podré asistir").click();
     cy.get("dialog[open]").contains("button", "Avisar").click();
 
     cy.contains("Avisamos que no podrás asistir").should("be.visible");
-    cy.contains("li.fila-solicitud", TITULO).should("contain", "Cancelada");
+    cy.contains("li.fila-solicitud", TITULO).should("not.exist");
+    cy.contains('[role="tab"]', "Disponibles").click();
+    cy.contains("li.tarjeta-actividad", TITULO).contains("button", "Inscribirme").should("be.visible");
   });
 });

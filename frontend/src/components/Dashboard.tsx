@@ -107,7 +107,7 @@ export default function Dashboard({ usuario }: Props) {
           )}
         </dl>
 
-        {usuario.rol === "ADMINISTRADOR" && <CambiarPassword />}
+        <CambiarPassword />
       </main>
     </div>
   );

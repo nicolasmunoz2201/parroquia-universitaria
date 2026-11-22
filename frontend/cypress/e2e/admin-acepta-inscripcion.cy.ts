@@ -113,6 +113,7 @@ describe("Flujo E2E: el administrador acepta una inscripción y el feligrés con
 
       iniciarSesion(env.FELIGRES_EMAIL, env.FELIGRES_PASSWORD);
       irA(/^Actividades$/);
+      cy.contains('[role="tab"]', "Inscritas").click();
       cy.contains("li.fila-solicitud", TITULO).within(() => {
         cy.contains("Aceptada, falta confirmar").should("be.visible");
         cy.contains("button", "Confirmar asistencia").click();

@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import {
-  crearUsuario,
-  actualizarRolUsuario,
-  enviarCorreoRecuperacion,
-  ETIQUETAS_ROL,
-} from "../services/usuario.service";
+import { crearUsuario, actualizarRolUsuario, ETIQUETAS_ROL } from "../services/usuario.service";
 import type { UsuarioAdmin, Rol } from "../services/usuario.service";
 import type { Organismo } from "../services/organismo.service";
 import { useUsuarios } from "../hooks/useUsuarios";
@@ -37,7 +32,6 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
   const [organismoId, setOrganismoId] = useState(usuario.organismoId ?? "");
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
-  const [confirmandoCorreo, setConfirmandoCorreo] = useState(false);
 
   const cambioRol =
     rol !== usuario.rol ||
@@ -77,47 +71,6 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
     }
   }
 
-  async function enviarCorreo() {
-    setGuardando(true);
-    try {
-      await enviarCorreoRecuperacion(usuario.id);
-      mostrarToast(`Correo de recuperación enviado a ${usuario.email}`);
-      onCerrar();
-    } catch (err) {
-      setConfirmandoCorreo(false);
-      setError(err instanceof Error ? err.message : "No se pudo enviar el correo de recuperación");
-    } finally {
-      setGuardando(false);
-    }
-  }
-
-  if (confirmandoCorreo) {
-    return (
-      <dialog
-        ref={dialogoRef}
-        className="dialogo-confirmacion"
-        onCancel={(e) => {
-          e.preventDefault();
-          setConfirmandoCorreo(false);
-        }}
-      >
-        <h2>Enviar correo de recuperación</h2>
-        <p>
-          ¿Enviar un correo a "{usuario.email}"? Recibirá un enlace para crear una nueva contraseña,
-          que sirve una sola vez y vence en 1 hora.
-        </p>
-        <div className="dialogo-acciones">
-          <button type="button" className="boton boton-secundario" onClick={() => setConfirmandoCorreo(false)}>
-            Volver
-          </button>
-          <button type="button" className="boton boton-principal" onClick={enviarCorreo} disabled={guardando}>
-            {guardando ? "Enviando..." : "Enviar correo"}
-          </button>
-        </div>
-      </dialog>
-    );
-  }
-
   return (
     <dialog ref={dialogoRef} className="dialogo-confirmacion" onCancel={onCerrar}>
       <h2>Editar usuario</h2>
@@ -154,18 +107,9 @@ function EditarUsuario({ usuario, organismos, onCerrar, onGuardado }: EditarUsua
         )}
 
         <p className="dialogo-ayuda dialogo-ayuda-separada">
-          La contraseña solo la cambia el usuario, con un enlace que le llega por correo.
+          La contraseña la cambia cada usuario desde su perfil. Si la olvidó, puede pedir un enlace con la
+          opción "¿Olvidaste tu contraseña?" al iniciar sesión.
         </p>
-        <button
-          type="button"
-          className="boton-enlace"
-          onClick={() => {
-            setError("");
-            setConfirmandoCorreo(true);
-          }}
-        >
-          Enviar correo de recuperación
-        </button>
 
         {error && <p className="login-error">{error}</p>}
 

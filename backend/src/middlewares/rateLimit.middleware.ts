@@ -3,6 +3,7 @@ import { leerEmail } from "../utils/validaciones";
 import {
   LIMITE_CAMBIO_PASSWORD,
   LIMITE_LOGIN,
+  LIMITE_RECUPERAR,
   LIMITE_REGISTRO,
   LIMITE_RESTABLECER,
 } from "../constants/limites";
@@ -39,6 +40,17 @@ export const limiteRestablecer = rateLimit({
   legacyHeaders: false,
   message: {
     message: `Demasiados intentos de restablecer la contraseña. Espera ${LIMITE_RESTABLECER.minutos} minutos e intenta de nuevo.`,
+  },
+});
+
+export const limiteRecuperar = rateLimit({
+  windowMs: LIMITE_RECUPERAR.minutos * MS_POR_MINUTO,
+  limit: LIMITE_RECUPERAR.intentos,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  keyGenerator: (req) => leerEmail(req.body?.email) ?? ipKeyGenerator(req.ip ?? ""),
+  message: {
+    message: `Ya pediste varios enlaces de recuperación. Espera ${LIMITE_RECUPERAR.minutos} minutos e intenta de nuevo.`,
   },
 });
 

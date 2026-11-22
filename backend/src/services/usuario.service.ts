@@ -42,6 +42,10 @@ export function obtenerUsuario(id: string) {
   return prisma.usuario.findUnique({ where: { id }, select: SELECT_SEGURO });
 }
 
+export function obtenerUsuarioPorEmail(email: string) {
+  return prisma.usuario.findUnique({ where: { email }, select: SELECT_SEGURO });
+}
+
 export function actualizarRolUsuario(id: string, data: { rol: Rol; organismoId: string | null }) {
   return prisma.usuario.update({
     where: { id },
