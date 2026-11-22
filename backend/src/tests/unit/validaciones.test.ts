@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leerEmail, validarDatosCuenta, validarPassword } from "../../utils/validaciones";
+import { leerEmail, validarDatosCuenta, validarEmail, validarPassword } from "../../utils/validaciones";
 
 describe("Validaciones de cuenta - Pruebas Unitarias", () => {
   it("debe limpiar espacios y dejar el correo en minúsculas", () => {
@@ -24,6 +24,11 @@ describe("Validaciones de cuenta - Pruebas Unitarias", () => {
     const error = validarDatosCuenta("Nicolas", "correo-sin-arroba", "clave123");
 
     expect(error).toBe("El correo no tiene un formato valido");
+  });
+
+  it("debe validar el correo por sí solo al pedir recuperación", () => {
+    expect(validarEmail("nicolas@correo.cl")).toBeNull();
+    expect(validarEmail("")).toBe("El correo no tiene un formato valido");
   });
 
   it("debe aceptar datos correctos y no devolver error", () => {

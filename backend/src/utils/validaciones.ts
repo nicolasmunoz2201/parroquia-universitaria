@@ -17,12 +17,16 @@ export function validarPassword(password: unknown): string | null {
   return null;
 }
 
+export function validarEmail(email?: string): string | null {
+  if (!email || !EMAIL_VALIDO.test(email)) {
+    return "El correo no tiene un formato valido";
+  }
+  return null;
+}
+
 export function validarDatosCuenta(nombre?: string, email?: string, password?: unknown): string | null {
   if (!nombre || !email || !password) {
     return "nombre, email y password son requeridos";
   }
-  if (!EMAIL_VALIDO.test(email)) {
-    return "El correo no tiene un formato valido";
-  }
-  return validarPassword(password);
+  return validarEmail(email) ?? validarPassword(password);
 }
