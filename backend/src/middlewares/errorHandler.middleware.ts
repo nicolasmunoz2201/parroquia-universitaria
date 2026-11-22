@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { MulterError } from "multer";
 import { Prisma } from "../generated/prisma/client";
 import { ArchivoInvalidoError } from "./upload.middleware";
-import { MAX_FOTOS_POR_PUBLICACION, MAX_TAMANO_FOTO_MB } from "../constants/archivos";
+import { MAX_FOTOS_POR_HITO, MAX_FOTOS_POR_PUBLICACION, MAX_TAMANO_FOTO_MB } from "../constants/archivos";
 
 export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (res.headersSent) {
@@ -17,7 +17,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
 
   if (err instanceof MulterError) {
     if (err.code === "LIMIT_UNEXPECTED_FILE") {
-      res.status(400).json({ message: `Puedes subir hasta ${MAX_FOTOS_POR_PUBLICACION} fotos por publicacion` });
+      const esHito = req.originalUrl.startsWith("/api/memoria");
+      res.status(400).json({
+        message: esHito
+          ? `Puedes subir hasta ${MAX_FOTOS_POR_HITO} fotos por hito`
+          : `Puedes subir hasta ${MAX_FOTOS_POR_PUBLICACION} fotos por publicacion`,
+      });
       return;
     }
     if (err.code === "LIMIT_FILE_SIZE") {

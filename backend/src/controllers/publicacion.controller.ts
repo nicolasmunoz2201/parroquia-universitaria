@@ -1,18 +1,10 @@
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
 import * as publicacionService from "../services/publicacion.service";
 import * as organismoService from "../services/organismo.service";
-import { eliminarArchivos } from "../middlewares/upload.middleware";
+import { eliminarArchivos, eliminarFotosGuardadas, urlDeFoto } from "../middlewares/upload.middleware";
 
 function puedeGestionarOrganismo(usuario: Request["usuario"], organismoId: string) {
   return usuario?.rol === "ADMINISTRADOR" || usuario?.organismoId === organismoId;
-}
-
-function eliminarImagenesGuardadas(imagenes: string[]) {
-  for (const imagenUrl of imagenes) {
-    fs.unlink(path.join(__dirname, "../..", imagenUrl), () => {});
-  }
 }
 
 export async function listar(req: Request, res: Response) {
@@ -48,7 +40,7 @@ export async function crear(req: Request, res: Response) {
     return;
   }
 
-  const imagenes = archivos.map((archivo) => `/uploads/${archivo.filename}`);
+  const imagenes = archivos.map(urlDeFoto);
 
   try {
     const publicacion = await publicacionService.crearPublicacion({
@@ -85,13 +77,11 @@ export async function actualizar(req: Request, res: Response) {
     const publicacion = await publicacionService.actualizarPublicacion(req.params.id as string, {
       ...(titulo ? { titulo } : {}),
       ...(contenido ? { contenido } : {}),
-      ...(archivos.length > 0
-        ? { imagenes: archivos.map((archivo) => `/uploads/${archivo.filename}`) }
-        : {}),
+      ...(archivos.length > 0 ? { imagenes: archivos.map(urlDeFoto) } : {}),
     });
 
     if (archivos.length > 0) {
-      eliminarImagenesGuardadas(existente.imagenes);
+      eliminarFotosGuardadas(existente.imagenes);
     }
 
     res.json(publicacion);
@@ -114,7 +104,7 @@ export async function eliminar(req: Request, res: Response) {
   }
 
   await publicacionService.eliminarPublicacion(req.params.id as string);
-  eliminarImagenesGuardadas(publicacion.imagenes);
+  eliminarFotosGuardadas(publicacion.imagenes);
 
   res.status(204).send();
 }

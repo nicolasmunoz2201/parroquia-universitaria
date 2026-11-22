@@ -62,6 +62,16 @@ export function eliminarArchivos(archivos: Express.Multer.File[]) {
   }
 }
 
+export function urlDeFoto(archivo: Express.Multer.File) {
+  return `/uploads/${archivo.filename}`;
+}
+
+export function eliminarFotosGuardadas(urls: string[]) {
+  for (const url of urls) {
+    fs.unlink(path.join(uploadDir, path.basename(url)), () => {});
+  }
+}
+
 async function esImagenReal(archivo: Express.Multer.File) {
   const tipo = TIPOS_DE_IMAGEN[archivo.mimetype];
   if (!tipo) return false;
