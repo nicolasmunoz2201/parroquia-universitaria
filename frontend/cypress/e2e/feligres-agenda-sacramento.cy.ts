@@ -46,15 +46,13 @@ describe("Flujo E2E: un feligrés agenda y cancela un sacramento", () => {
   it("inicia sesión, reserva una hora de Unción de los enfermos y la cancela", () => {
     cy.env(["FELIGRES_EMAIL", "FELIGRES_PASSWORD"]).then(({ FELIGRES_EMAIL, FELIGRES_PASSWORD }) => {
       cy.visit("/");
-      cy.get('[aria-label="Abrir menu"]').click();
-      cy.contains("button", "Iniciar sesion").click();
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(FELIGRES_EMAIL);
       cy.get("#password").type(FELIGRES_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Agendar sacramentos").click();
+    cy.irA("Agendar sacramentos");
 
     cy.get("#tipoSacramento").select("Unción de los enfermos");
     cy.contains("label", LUGAR).click();

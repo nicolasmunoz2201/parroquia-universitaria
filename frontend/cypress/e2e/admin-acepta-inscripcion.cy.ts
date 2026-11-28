@@ -13,20 +13,14 @@ function tokenDe(apiUrl: string, email: string, password: string) {
 
 function iniciarSesion(email: string, password: string) {
   cy.visit("/");
-  cy.get('[aria-label="Abrir menu"]').click();
-  cy.contains("button", "Iniciar sesion").click();
+  cy.irA("Iniciar sesión");
   cy.get("#email").type(email);
   cy.get("#password").type(password, { log: false });
   cy.get('button[type="submit"]').click();
 }
 
-function irA(opcion: string | RegExp) {
-  cy.get('[aria-label="Abrir menu"]').click();
-  cy.contains("button", opcion).click();
-}
-
 function cerrarSesion() {
-  irA("Cerrar sesion");
+  cy.irA("Cerrar sesión", "cuenta");
 }
 
 describe("Flujo E2E: el administrador acepta una inscripción y el feligrés confirma su asistencia", () => {
@@ -90,14 +84,14 @@ describe("Flujo E2E: el administrador acepta una inscripción y el feligrés con
   it("el feligrés se inscribe, el admin acepta y el feligrés confirma su asistencia", () => {
     cy.env(["ADMIN_EMAIL", "ADMIN_PASSWORD", "FELIGRES_EMAIL", "FELIGRES_PASSWORD"]).then((env) => {
       iniciarSesion(env.FELIGRES_EMAIL, env.FELIGRES_PASSWORD);
-      irA(/^Actividades$/);
+      cy.irA("Actividades", "parroquia");
       cy.contains("li.tarjeta-actividad", TITULO).contains("button", "Inscribirme").click();
       cy.contains("Inscripción enviada").should("be.visible");
       cy.contains("li.fila-solicitud", TITULO).should("contain", "Pendiente de aprobación");
       cerrarSesion();
 
       iniciarSesion(env.ADMIN_EMAIL, env.ADMIN_PASSWORD);
-      irA("Gestionar actividades");
+      cy.irA("Actividades", "gestion");
       cy.contains("li.fila-actividad", TITULO).within(() => {
         cy.contains("1 de 5 cupos ocupados").should("be.visible");
         cy.contains("button", "Inscritos").click();
@@ -112,7 +106,7 @@ describe("Flujo E2E: el administrador acepta una inscripción y el feligrés con
       cerrarSesion();
 
       iniciarSesion(env.FELIGRES_EMAIL, env.FELIGRES_PASSWORD);
-      irA(/^Actividades$/);
+      cy.irA("Actividades", "parroquia");
       cy.contains('[role="tab"]', "Inscritas").click();
       cy.contains("li.fila-solicitud", TITULO).within(() => {
         cy.contains("Aceptada, falta confirmar").should("be.visible");
@@ -123,7 +117,7 @@ describe("Flujo E2E: el administrador acepta una inscripción y el feligrés con
       cerrarSesion();
 
       iniciarSesion(env.ADMIN_EMAIL, env.ADMIN_PASSWORD);
-      irA("Gestionar actividades");
+      cy.irA("Actividades", "gestion");
       cy.contains("li.fila-actividad", TITULO).within(() => {
         cy.contains("button", "Inscritos").click();
         cy.contains("li", env.FELIGRES_EMAIL).should("contain", "Asistencia confirmada");

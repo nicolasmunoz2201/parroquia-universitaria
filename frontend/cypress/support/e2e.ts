@@ -10,6 +10,27 @@ function esperar(resultado: unknown) {
   return new Promise((resolve) => setTimeout(() => resolve(resultado), PAUSA_MS));
 }
 
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      irA(opcion: string, grupo?: string): Chainable<void>;
+    }
+  }
+}
+
+function textoExacto(texto: string) {
+  return new RegExp(`^${texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+}
+
+Cypress.Commands.add("irA", (opcion: string, grupo?: string) => {
+  if (grupo) {
+    cy.get(`nav.menu-superior [data-menu="${grupo}"]`).click();
+    cy.get("nav.menu-superior .menu-desplegable").contains("button", textoExacto(opcion)).click();
+    return;
+  }
+  cy.get("nav.menu-superior").contains("button", textoExacto(opcion)).click();
+});
+
 if (Cypress.config("isInteractive")) {
   const sobrescribir = Cypress.Commands.overwrite as Sobrescribir;
   for (const accion of ACCIONES) {

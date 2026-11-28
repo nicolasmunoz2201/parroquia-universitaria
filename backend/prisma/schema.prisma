@@ -153,12 +153,14 @@ model HitoHistorico {
   fotos       FotoHito[]
   testimonios Testimonio[]
   createdAt   DateTime     @default(now())
+
+  @@index([fecha])
 }
 
 model FotoHito {
   id     String        @id @default(cuid())
   url    String
-  hito   HitoHistorico @relation(fields: [hitoId], references: [id])
+  hito   HitoHistorico @relation(fields: [hitoId], references: [id], onDelete: Cascade)
   hitoId String
 }
 
@@ -166,7 +168,7 @@ model Testimonio {
   id          String        @id @default(cuid())
   autorNombre String
   contenido   String
-  hito        HitoHistorico @relation(fields: [hitoId], references: [id])
+  hito        HitoHistorico @relation(fields: [hitoId], references: [id], onDelete: Cascade)
   hitoId      String
   createdAt   DateTime      @default(now())
 }

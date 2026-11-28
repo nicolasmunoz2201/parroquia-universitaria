@@ -42,15 +42,13 @@ describe("Flujo E2E: el administrador gestiona un insumo del comedor", () => {
   it("crea un insumo, registra una entrada y una salida, y ve las alertas", () => {
     cy.env(["ADMIN_EMAIL", "ADMIN_PASSWORD"]).then(({ ADMIN_EMAIL, ADMIN_PASSWORD }) => {
       cy.visit("/");
-      cy.get('[aria-label="Abrir menu"]').click();
-      cy.contains("button", "Iniciar sesion").click();
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(ADMIN_EMAIL);
       cy.get("#password").type(ADMIN_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Inventario del comedor").click();
+    cy.irA("Inventario del comedor", "gestion");
     cy.contains("h1", "Inventario del comedor").should("be.visible");
 
     cy.get("#nombreInsumo").type(INSUMO);

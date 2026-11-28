@@ -1,6 +1,7 @@
 @import "./styles/tipografia.css";
 @import "./styles/layout.css";
 @import "./styles/sidebar.css";
+@import "./styles/menu.css";
 @import "./styles/botones.css";
 @import "./styles/formularios.css";
 @import "./styles/notificaciones.css";
@@ -13,3 +14,4 @@
 @import "./styles/sacramentos.css";
 @import "./styles/inventario.css";
 @import "./styles/actividades.css";
+@import "./styles/memoria.css";

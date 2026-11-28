@@ -17,6 +17,15 @@ export function formatearFechaHora(iso: string) {
   });
 }
 
+export function formatearFecha(iso: string) {
+  return new Date(iso).toLocaleDateString("es-CL", {
+    timeZone: ZONA_HORARIA,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export function hoyParaInput() {
   const ahora = new Date();
   ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());

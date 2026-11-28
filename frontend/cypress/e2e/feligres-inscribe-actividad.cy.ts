@@ -72,15 +72,13 @@ describe("Flujo E2E: un feligrés se inscribe en una actividad y avisa que no po
   it("inicia sesión, se inscribe, ve su inscripción pendiente en Inscritas y libera el cupo", () => {
     cy.env(["FELIGRES_EMAIL", "FELIGRES_PASSWORD"]).then(({ FELIGRES_EMAIL, FELIGRES_PASSWORD }) => {
       cy.visit("/");
-      cy.get('[aria-label="Abrir menu"]').click();
-      cy.contains("button", "Iniciar sesion").click();
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(FELIGRES_EMAIL);
       cy.get("#password").type(FELIGRES_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", /^Actividades$/).click();
+    cy.irA("Actividades", "parroquia");
     cy.contains("h1", "Actividades").should("be.visible");
 
     cy.contains("li.tarjeta-actividad", TITULO).within(() => {
