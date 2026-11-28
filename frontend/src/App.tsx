@@ -17,7 +17,9 @@ import { ROLES_GESTION_ACTIVIDADES } from "./constants/actividades";
 import { ROLES_GESTION_SACRAMENTOS } from "./constants/sacramentos";
 import { ROLES_INVENTARIO } from "./constants/inventario";
 import Sidebar from "./components/Sidebar";
-import type { Vista } from "./components/Sidebar";
+import MenuSuperior from "./components/MenuSuperior";
+import { construirMenu, puedeGestionarPublicaciones } from "./utils/menu";
+import type { Vista } from "./utils/menu";
 import { logout, obtenerSesion } from "./services/auth.service";
 import type { Usuario } from "./services/auth.service";
 import { getToken } from "./services/api";
@@ -25,10 +27,6 @@ import { useToast } from "./context/toast";
 import { EVENTO_SESION_EXPIRADA, MENSAJE_SESION_EXPIRADA } from "./constants/autenticacion";
 import logoIcono from "./assets/logo-icono.png";
 import "./App.css";
-
-function puedeGestionarPublicaciones(usuario: Usuario | null) {
-  return usuario?.rol === "ADMINISTRADOR" || usuario?.rol === "ENCARGADO_ORGANISMO";
-}
 
 function App() {
   const { mostrarToast } = useToast();
@@ -95,6 +93,8 @@ function App() {
     return null;
   }
 
+  const grupos = construirMenu(usuario);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -107,15 +107,24 @@ function App() {
           <span />
           <span />
         </button>
-        <img src={logoIcono} alt="" className="topbar-logo" />
-        <span className="topbar-titulo">Parroquia Universitaria UdeC</span>
+        <button type="button" className="topbar-marca" onClick={() => navegar("inicio")}>
+          <img src={logoIcono} alt="" className="topbar-logo" />
+          <span className="topbar-titulo">Parroquia Universitaria UdeC</span>
+        </button>
+        <MenuSuperior
+          usuario={usuario}
+          vistaActual={vista}
+          grupos={grupos}
+          onNavegar={navegar}
+          onLogout={handleLogout}
+        />
       </header>
 
       <Sidebar
         usuario={usuario}
         vistaActual={vista}
         abierto={sidebarAbierto}
-        puedeGestionar={puedeGestionarPublicaciones(usuario)}
+        grupos={grupos}
         onNavegar={navegar}
         onLogout={handleLogout}
         onCerrar={() => setSidebarAbierto(false)}

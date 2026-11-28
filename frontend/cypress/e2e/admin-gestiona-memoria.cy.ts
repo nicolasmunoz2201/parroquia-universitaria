@@ -8,11 +8,6 @@ function tokenAdmin(env: Record<string, string>) {
     .then((respuesta) => respuesta.body.token as string);
 }
 
-function irA(opcion: string | RegExp) {
-  cy.get('[aria-label="Abrir menu"]').click();
-  cy.contains("button", opcion).click();
-}
-
 describe("Flujo E2E: el administrador arma la memoria histórica", () => {
   after(() => {
     cy.env(["API_URL", "ADMIN_EMAIL", "ADMIN_PASSWORD"]).then((env) => {
@@ -34,13 +29,13 @@ describe("Flujo E2E: el administrador arma la memoria histórica", () => {
   it("crea un hito con foto, le agrega un testimonio, lo ve en la línea de tiempo y quita la foto", () => {
     cy.env(["ADMIN_EMAIL", "ADMIN_PASSWORD"]).then(({ ADMIN_EMAIL, ADMIN_PASSWORD }) => {
       cy.visit("/");
-      irA("Iniciar sesion");
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(ADMIN_EMAIL);
       cy.get("#password").type(ADMIN_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    irA("Gestionar memoria");
+    cy.irA("Memoria histórica", "gestion");
     cy.get("#tituloHito").type(TITULO);
     cy.get("#fechaHito").type("1975-03-19");
     cy.get("#descripcionHito").type("Se bendice el templo de la Parroquia Universitaria.");
@@ -59,7 +54,7 @@ describe("Flujo E2E: el administrador arma la memoria histórica", () => {
     cy.contains("Testimonio agregado").should("be.visible");
     cy.contains("li.fila-hito", TITULO).should("contain", "1 testimonio(s)");
 
-    irA("Memoria histórica");
+    cy.irA("Memoria histórica", "parroquia");
     cy.contains("h2", "1975").should("be.visible");
     cy.contains("article.hito-tarjeta", TITULO).within(() => {
       cy.contains("19 de marzo de 1975").should("be.visible");
@@ -67,7 +62,7 @@ describe("Flujo E2E: el administrador arma la memoria histórica", () => {
       cy.contains("blockquote", TESTIMONIO).should("contain", "María González, catequista");
     });
 
-    irA("Gestionar memoria");
+    cy.irA("Memoria histórica", "gestion");
     cy.contains("li.fila-hito", TITULO).contains("button", "Editar").click();
     cy.contains("Foto actual 1").should("be.visible");
     cy.get('[aria-label="Quitar foto actual 1"]').click();

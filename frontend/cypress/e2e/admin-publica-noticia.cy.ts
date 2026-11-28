@@ -41,15 +41,13 @@ describe("Flujo E2E: el administrador publica una noticia con foto", () => {
   it("inicia sesión, publica con una foto, la ve en Inicio y luego la elimina", () => {
     cy.env(["ADMIN_EMAIL", "ADMIN_PASSWORD"]).then(({ ADMIN_EMAIL, ADMIN_PASSWORD }) => {
       cy.visit("/");
-      cy.get('[aria-label="Abrir menu"]').click();
-      cy.contains("button", "Iniciar sesion").click();
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(ADMIN_EMAIL);
       cy.get("#password").type(ADMIN_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Gestionar publicaciones").click();
+    cy.irA("Publicaciones", "gestion");
 
     cy.get("#titulo").type(TITULO);
     cy.get("#contenido").type("Te invitamos a la jornada solidaria de este sábado en el comedor.");
@@ -62,15 +60,13 @@ describe("Flujo E2E: el administrador publica una noticia con foto", () => {
     cy.contains("Publicacion creada con exito").should("be.visible");
     cy.contains("li", TITULO).should("contain", ORGANISMO);
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Inicio").click();
+    cy.irA("Inicio");
     cy.contains("article", TITULO).within(() => {
       cy.contains(ORGANISMO).should("be.visible");
       cy.get("img").should("be.visible");
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Gestionar publicaciones").click();
+    cy.irA("Publicaciones", "gestion");
     cy.contains("li", TITULO).contains("button", "Eliminar").click();
     cy.get("dialog[open]").contains("button", "Eliminar").click();
     cy.contains("Publicacion eliminada con exito").should("be.visible");
