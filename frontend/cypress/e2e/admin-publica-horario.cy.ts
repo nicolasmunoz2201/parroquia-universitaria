@@ -12,15 +12,13 @@ describe("Flujo E2E: el administrador publica y elimina un horario", () => {
   it("inicia sesión, publica un horario de bautismo y luego lo elimina", () => {
     cy.env(["ADMIN_EMAIL", "ADMIN_PASSWORD"]).then(({ ADMIN_EMAIL, ADMIN_PASSWORD }) => {
       cy.visit("/");
-      cy.get('[aria-label="Abrir menu"]').click();
-      cy.contains("button", "Iniciar sesion").click();
+      cy.irA("Iniciar sesión");
       cy.get("#email").type(ADMIN_EMAIL);
       cy.get("#password").type(ADMIN_PASSWORD, { log: false });
       cy.get('button[type="submit"]').click();
     });
 
-    cy.get('[aria-label="Abrir menu"]').click();
-    cy.contains("button", "Agendamientos").click();
+    cy.irA("Agendamientos", "gestion");
     cy.contains("h1", "Agendamientos").should("be.visible");
 
     cy.get("#tipoHorario").select("Bautismo");

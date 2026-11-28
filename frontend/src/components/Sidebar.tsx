@@ -1,53 +1,39 @@
 import type { Usuario } from "../services/auth.service";
-import { ROLES_GESTION_SACRAMENTOS } from "../constants/sacramentos";
-import { ROLES_INVENTARIO } from "../constants/inventario";
-import { ROLES_GESTION_ACTIVIDADES } from "../constants/actividades";
-
-export type Vista =
-  | "inicio"
-  | "actividades"
-  | "gestion-actividades"
-  | "login"
-  | "perfil"
-  | "gestion"
-  | "organismos"
-  | "usuarios"
-  | "sacramentos"
-  | "agendamientos"
-  | "inventario";
+import type { GrupoMenu, Vista } from "../utils/menu";
 
 interface Props {
   usuario: Usuario | null;
   vistaActual: Vista;
   abierto: boolean;
-  puedeGestionar: boolean;
+  grupos: GrupoMenu[];
   onNavegar: (vista: Vista) => void;
   onLogout: () => void;
   onCerrar: () => void;
 }
 
-export default function Sidebar({
-  usuario,
-  vistaActual,
-  abierto,
-  puedeGestionar,
-  onNavegar,
-  onLogout,
-  onCerrar,
-}: Props) {
-  const esAdmin = usuario?.rol === "ADMINISTRADOR";
-  const gestionaSacramentos = !!usuario && ROLES_GESTION_SACRAMENTOS.includes(usuario.rol);
-  const gestionaInventario = !!usuario && ROLES_INVENTARIO.includes(usuario.rol);
-  const gestionaActividades = !!usuario && ROLES_GESTION_ACTIVIDADES.includes(usuario.rol);
+export default function Sidebar({ usuario, vistaActual, abierto, grupos, onNavegar, onLogout, onCerrar }: Props) {
   function navegar(vista: Vista) {
     onNavegar(vista);
     onCerrar();
   }
 
+  function enlace(vista: Vista, texto: string) {
+    return (
+      <button
+        key={vista}
+        className={`sidebar-link ${vistaActual === vista ? "activo" : ""}`}
+        aria-current={vistaActual === vista ? "page" : undefined}
+        onClick={() => navegar(vista)}
+      >
+        {texto}
+      </button>
+    );
+  }
+
   return (
     <>
       {abierto && <div className="sidebar-backdrop" onClick={onCerrar} />}
-      <aside className={`sidebar ${abierto ? "sidebar-abierto" : ""}`}>
+      <aside className={`sidebar ${abierto ? "sidebar-abierto" : ""}`} inert={!abierto}>
         <div className="sidebar-header">
           <span className="sidebar-titulo">Parroquia Universitaria UdeC</span>
           <button className="sidebar-cerrar" aria-label="Cerrar menu" onClick={onCerrar}>
@@ -55,100 +41,33 @@ export default function Sidebar({
           </button>
         </div>
 
-        <nav className="sidebar-nav">
-          <button
-            className={`sidebar-link ${vistaActual === "inicio" ? "activo" : ""}`}
-            onClick={() => navegar("inicio")}
-          >
-            Inicio
-          </button>
-          <button
-            className={`sidebar-link ${vistaActual === "actividades" ? "activo" : ""}`}
-            onClick={() => navegar("actividades")}
-          >
-            Actividades
-          </button>
-          {usuario && (
-            <button
-              className={`sidebar-link ${vistaActual === "perfil" ? "activo" : ""}`}
-              onClick={() => navegar("perfil")}
-            >
-              Mi perfil
-            </button>
-          )}
-          {usuario && (
-            <button
-              className={`sidebar-link ${vistaActual === "sacramentos" ? "activo" : ""}`}
-              onClick={() => navegar("sacramentos")}
-            >
-              Agendar sacramentos
-            </button>
-          )}
-          {gestionaSacramentos && (
-            <button
-              className={`sidebar-link ${vistaActual === "agendamientos" ? "activo" : ""}`}
-              onClick={() => navegar("agendamientos")}
-            >
-              Agendamientos
-            </button>
-          )}
-          {gestionaActividades && (
-            <button
-              className={`sidebar-link ${vistaActual === "gestion-actividades" ? "activo" : ""}`}
-              onClick={() => navegar("gestion-actividades")}
-            >
-              Gestionar actividades
-            </button>
-          )}
-          {gestionaInventario && (
-            <button
-              className={`sidebar-link ${vistaActual === "inventario" ? "activo" : ""}`}
-              onClick={() => navegar("inventario")}
-            >
-              Inventario del comedor
-            </button>
-          )}
-          {puedeGestionar && (
-            <button
-              className={`sidebar-link ${vistaActual === "gestion" ? "activo" : ""}`}
-              onClick={() => navegar("gestion")}
-            >
-              Gestionar publicaciones
-            </button>
-          )}
-          {esAdmin && (
-            <button
-              className={`sidebar-link ${vistaActual === "organismos" ? "activo" : ""}`}
-              onClick={() => navegar("organismos")}
-            >
-              Organismos
-            </button>
-          )}
-          {esAdmin && (
-            <button
-              className={`sidebar-link ${vistaActual === "usuarios" ? "activo" : ""}`}
-              onClick={() => navegar("usuarios")}
-            >
-              Usuarios
-            </button>
-          )}
+        <nav className="sidebar-nav" aria-label="Menú principal">
+          {enlace("inicio", "Inicio")}
+          {grupos.map((grupo) => (
+            <div key={grupo.id} className="sidebar-grupo">
+              <p className="sidebar-grupo-titulo">{grupo.titulo}</p>
+              {grupo.opciones.map((opcion) => enlace(opcion.vista, opcion.texto))}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-footer">
           {usuario ? (
-            <button
-              className="sidebar-link"
-              onClick={() => {
-                onLogout();
-                onCerrar();
-              }}
-            >
-              Cerrar sesion
-            </button>
+            <>
+              <p className="sidebar-usuario">{usuario.nombre}</p>
+              {enlace("perfil", "Mi perfil")}
+              <button
+                className="sidebar-link"
+                onClick={() => {
+                  onLogout();
+                  onCerrar();
+                }}
+              >
+                Cerrar sesión
+              </button>
+            </>
           ) : (
-            <button className="sidebar-link" onClick={() => navegar("login")}>
-              Iniciar sesion
-            </button>
+            enlace("login", "Iniciar sesión")
           )}
         </div>
       </aside>

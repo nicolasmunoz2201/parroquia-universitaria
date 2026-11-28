@@ -22,6 +22,19 @@
   z-index: 10;
 }
 
+.topbar-marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .topbar-logo {
   width: 44px;
   height: 44px;
@@ -79,5 +92,9 @@
 
   .topbar-titulo {
     font-size: 15.5px;
+  }
+
+  .topbar-marca {
+    gap: 12px;
   }
 }

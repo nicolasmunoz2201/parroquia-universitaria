@@ -1,0 +1,216 @@
+.pagina-memoria {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.linea-tiempo,
+.linea-tiempo-hitos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.linea-tiempo {
+  position: relative;
+  padding-left: 28px;
+}
+
+.linea-tiempo::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.linea-tiempo-anio {
+  margin-bottom: 28px;
+}
+
+.linea-tiempo-etiqueta {
+  position: relative;
+  margin: 0 0 12px;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.linea-tiempo-etiqueta::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -27px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  transform: translateY(-50%);
+}
+
+.linea-tiempo-hitos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hito {
+  position: relative;
+}
+
+.hito::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: -24px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acento-secundario);
+}
+
+.hito-tarjeta {
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.hito-fecha {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.hito-tarjeta h3 {
+  margin: 4px 0 8px;
+  font-size: 18px;
+}
+
+.hito-descripcion {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.hito-fotos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.hito-fotos a {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.hito-fotos-una {
+  grid-template-columns: 1fr;
+}
+
+.hito-fotos-una a {
+  aspect-ratio: 16 / 9;
+}
+
+.hito-fotos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.hito-fotos a:hover img {
+  transform: scale(1.03);
+}
+
+.hito-testimonios {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.testimonio {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--acento-secundario-soft);
+  border-left: 4px solid var(--acento-secundario);
+  border-radius: 0 8px 8px 0;
+}
+
+.testimonio p {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.testimonio cite {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.testimonio cite::before {
+  content: "— ";
+}
+
+.formulario-testimonio {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.formulario-testimonio label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.formulario-testimonio input,
+.formulario-testimonio textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.formulario-testimonio textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.formulario-testimonio .boton {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.panel-testimonios .fila-solicitud-info span {
+  white-space: pre-line;
+}
+
+@media (max-width: 480px) {
+  .linea-tiempo {
+    padding-left: 22px;
+  }
+
+  .linea-tiempo-etiqueta::before {
+    left: -21px;
+  }
+
+  .hito::before {
+    left: -18px;
+  }
+}
