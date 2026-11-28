@@ -108,6 +108,19 @@ Requisitos: Node.js 22 o superior y PostgreSQL.
    npm run dev
    ```
 
+### Con Docker
+
+Levanta la base de datos (PostgreSQL 16), el backend y el frontend en contenedores, sin instalar Node.js ni PostgreSQL. Requiere Docker con Docker Compose y el archivo `backend/.env` con `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y, para los correos, `SMTP_USER` y `SMTP_PASS`. La conexión a la base de datos y la URL del frontend las define el `docker-compose.yaml`.
+
+```bash
+docker compose up -d --build   # construye y levanta los tres contenedores
+docker compose ps              # estado de los contenedores
+docker compose logs backend    # mensajes del backend
+docker compose down            # detiene los contenedores sin borrar los datos
+```
+
+La página queda en `http://localhost:4173` y la API en `http://localhost:3000`. Al arrancar, el backend aplica las migraciones y crea el administrador inicial. La base de datos, las fotos y los documentos se guardan en volúmenes, así que no se pierden al detener los contenedores; `docker compose down -v` sí los borra.
+
 ## Pruebas
 
 ### Unitarias y de integración (backend)
